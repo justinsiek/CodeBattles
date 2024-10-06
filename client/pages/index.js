@@ -6,19 +6,45 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Progress } from "@/components/ui/progress"
-import { Zap, Code, Users, Swords, Sword, History } from "lucide-react";
-import { useState } from "react";
+import { Zap, Code, Users, Swords, Sword, History } from "lucide-react"
+import { useState } from "react"
+import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { BattlePopup } from "@/components/battlePopup"
 
 export default function Index() {
-  const [username, setUsername] = useState("abg slayer");
-  const [rating, setRating] = useState(1850);
-  const [progress, setProgress] = useState(75);
-  const [currentRank, setCurrentRank] = useState("Elite");
-  const [nextRank, setNextRank] = useState("Master");
+  const [username, setUsername] = useState("abg slayer")
+  const [rating, setRating] = useState(1850)
+  const [currentRank, setCurrentRank] = useState("Elite")
+  const [nextRank, setNextRank] = useState("Master")
+
+  const recentMatches = [
+    { opponent: "pandyrew", rating: 1900, result: "Win", ratingChange: 25 },
+    { opponent: "scarface", rating: 1800, result: "Loss", ratingChange: -18 },
+    { opponent: "jshawty", rating: 1850, result: "Win", ratingChange: 22 },
+    { opponent: "kanade", rating: 1820, result: "Win", ratingChange: 20 },
+    { opponent: "mitsu", rating: 1780, result: "Loss", ratingChange: -15 },
+  ]
+
+  const ratingData = [
+    { match: 1, rating: 1850 },
+    { match: 2, rating: 1832 },
+    { match: 3, rating: 1879 },
+    { match: 4, rating: 1861 },
+    { match: 5, rating: 1825 },
+    { match: 6, rating: 1893 },
+    { match: 7, rating: 1847 },
+    { match: 8, rating: 1876 },
+    { match: 9, rating: 1839 },
+    { match: 10, rating: 1902 },
+    { match: 11, rating: 1868 },
+    { match: 12, rating: 1815 },
+    { match: 13, rating: 1884 },
+    { match: 14, rating: 1857 },
+    { match: 15, rating: 1891 },
+  ]
 
   return (
-    (<div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground">
       {/* Sidebar */}
       <div className="w-64 border-r p-4 flex flex-col">
         <div className="flex items-center space-x-2 mb-6">
@@ -27,8 +53,8 @@ export default function Index() {
         </div>
         <nav className="space-y-2 mb-6">
           <Button variant="ghost" className="w-full justify-start">
-            <Zap className="mr-2 h-4 w-4" />
-            Quick Battle
+            <Swords className="mr-2 h-4 w-4" />
+            Battle
           </Button>
           <Button variant="ghost" className="w-full justify-start">
             <Code className="mr-2 h-4 w-4" />
@@ -55,12 +81,12 @@ export default function Index() {
           <Card className="col-span-2">
             <CardContent className="flex items-center justify-between p-6 bg-secondary">
               <div>
-                <h2 className="text-2xl font-semibold mb-2">Ready to Code?</h2>
+                <h2 className="text-2xl font-semibold mb-2">Ready to Battle?</h2>
                 <p className="text-muted-foreground">Challenge opponents and climb the ranks!</p>
               </div>
               <Button size="lg" className="px-8">
                 <Swords className="mr-2 h-5 w-5" />
-                Start Battle
+                Find Battle
               </Button>
             </CardContent>
           </Card>
@@ -68,15 +94,23 @@ export default function Index() {
           {/*Rating Card*/}
           <Card className="col-span-1 lg:col-span-2">
             <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-2xl font-semibold">Your Rating</span>
-                  <span className="text-4xl font-bold">{rating}</span>
-                </div>
-                <Progress value={progress} className="w-full h-3 mb-2" />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Current Rank: {currentRank}</span>
-                  <span>Next Rank: {nextRank}</span>
-                </div>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-2xl font-semibold">Your Rating</span>
+                <span className="text-4xl font-bold">{rating}</span>
+              </div>
+              <div className="h-40 mr-12">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={ratingData}>
+                    <XAxis dataKey="match" tick={false} />
+                    <YAxis domain={['dataMin - 20', 'dataMax + 20']} tick={false} axisLine={false} />
+                    <Line type="monotone" dataKey="rating" stroke="hsl(var(--primary))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex justify-between text-sm text-muted-foreground mt-4">
+                <span>Current Rank: {currentRank}</span>
+                <span>Next Rank: {nextRank}</span>
+              </div>
             </CardContent>
           </Card>
           {/* Recent Matches */}
@@ -86,13 +120,7 @@ export default function Index() {
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[180px]">
-                {[
-                  { opponent: "pandyrew", rating: 1900, result: "Win", ratingChange: "+25" },
-                  { opponent: "scarface", rating: 1800, result: "Loss", ratingChange: "-18" },
-                  { opponent: "jshawty", rating: 1850, result: "Win", ratingChange: "+22" },
-                  { opponent: "kanade", rating: 1820, result: "Win", ratingChange: "+20" },
-                  { opponent: "mitsu", rating: 1780, result: "Loss", ratingChange: "-15" },
-                ].map((match, index) => (
+                {recentMatches.map((match, index) => (
                   <div key={index} className="flex justify-between items-center mb-2">
                     <span>{match.opponent} <span className="text-muted-foreground">{match.rating}</span></span>
                     <div>
@@ -104,8 +132,8 @@ export default function Index() {
                         </div>
                         <div className="w-12 text-right">
                           <span
-                            className={`${match.ratingChange.startsWith("+") ? "text-green-500" : "text-red-500"}`}>
-                            {match.ratingChange}
+                            className={`${match.ratingChange > 0 ? "text-green-500" : "text-red-500"}`}>
+                            {match.ratingChange > 0 ? `+${match.ratingChange}` : match.ratingChange}
                           </span>
                         </div>
                       </div>
@@ -185,6 +213,6 @@ export default function Index() {
           ))}
         </div>
       </div>
-    </div>)
-  );
+    </div>
+  )
 }
