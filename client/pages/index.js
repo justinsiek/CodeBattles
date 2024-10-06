@@ -8,21 +8,22 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Zap, Code, Users, Swords, Sword, History } from "lucide-react"
 import { useState } from "react"
-import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { BattlePopup } from "@/components/battlePopup"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 export default function Index() {
   const [username, setUsername] = useState("abg slayer")
   const [rating, setRating] = useState(1850)
   const [currentRank, setCurrentRank] = useState("Elite")
-  const [nextRank, setNextRank] = useState("Master")
+  const [nextRank, setNextRank] = useState("Expert")
 
   const recentMatches = [
     { opponent: "pandyrew", rating: 1900, result: "Win", ratingChange: 25 },
     { opponent: "scarface", rating: 1800, result: "Loss", ratingChange: -18 },
     { opponent: "jshawty", rating: 1850, result: "Win", ratingChange: 22 },
     { opponent: "kanade", rating: 1820, result: "Win", ratingChange: 20 },
-    { opponent: "mitsu", rating: 1780, result: "Loss", ratingChange: -15 },
+    { opponent: "tourist", rating: 1800, result: "Loss", ratingChange: -15 },
   ]
 
   const ratingData = [
@@ -40,11 +41,11 @@ export default function Index() {
     { match: 12, rating: 1815 },
     { match: 13, rating: 1884 },
     { match: 14, rating: 1857 },
-    { match: 15, rating: 1891 },
+    { match: 15, rating: 1850 },
   ]
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* Sidebar */}
       <div className="w-64 border-r p-4 flex flex-col">
         <div className="flex items-center space-x-2 mb-6">
@@ -52,10 +53,20 @@ export default function Index() {
           <h2 className="font-bold text-xl">CodeBattles</h2>
         </div>
         <nav className="space-y-2 mb-6">
-          <Button variant="ghost" className="w-full justify-start">
-            <Swords className="mr-2 h-4 w-4" />
-            Battle
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start">
+                <Swords className="mr-2 h-4 w-4" />
+                Battle
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Battle Options</DialogTitle>
+              </DialogHeader>
+              <BattlePopup />
+            </DialogContent>
+          </Dialog>
           <Button variant="ghost" className="w-full justify-start">
             <Code className="mr-2 h-4 w-4" />
             Practice
@@ -73,7 +84,7 @@ export default function Index() {
       {/* Main Content */}
       <div className="flex-1 p-6">
         <header className="mb-6">
-          <h1 className="text-3xl font-bold">Welcome back, {username}!</h1>
+          <h1 className="text-4xl font-bold">Welcome back, {username}!</h1>
           <p className="text-muted-foreground mt-2">Ready for your next challenge?</p>
         </header>
         <div className="grid grid-cols-2 gap-6">
@@ -84,10 +95,20 @@ export default function Index() {
                 <h2 className="text-2xl font-semibold mb-2">Ready to Battle?</h2>
                 <p className="text-muted-foreground">Challenge opponents and climb the ranks!</p>
               </div>
-              <Button size="lg" className="px-8">
-                <Swords className="mr-2 h-5 w-5" />
-                Find Battle
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="px-8">
+                    <Swords className="mr-2 h-5 w-5" />
+                    Find Battle
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Battle Options</DialogTitle>
+                  </DialogHeader>
+                  <BattlePopup />
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
@@ -104,6 +125,16 @@ export default function Index() {
                     <XAxis dataKey="match" tick={false} />
                     <YAxis domain={['dataMin - 20', 'dataMax + 20']} tick={false} axisLine={false} />
                     <Line type="monotone" dataKey="rating" stroke="hsl(var(--primary))" strokeWidth={2} />
+                    <Tooltip content={({ payload }) => {
+                      if (payload && payload.length > 0) {
+                        return (
+                          <div className="bg-background p-2 rounded shadow">
+                            <p className="text-foreground">{payload[0].value}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -114,12 +145,12 @@ export default function Index() {
             </CardContent>
           </Card>
           {/* Recent Matches */}
-          <Card>
+          <Card className="h-full">
             <CardHeader>
-              <CardTitle>Recent Matches</CardTitle>
+              <CardTitle className="text-xl">Recent Matches</CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[180px]">
+              <ScrollArea>
                 {recentMatches.map((match, index) => (
                   <div key={index} className="flex justify-between items-center mb-2">
                     <span>{match.opponent} <span className="text-muted-foreground">{match.rating}</span></span>
@@ -147,16 +178,16 @@ export default function Index() {
           {/* Leaderboard */}
           <Card>
             <CardHeader>
-              <CardTitle>Friends Leaderboard</CardTitle>
+              <CardTitle className="text-xl">Friends Leaderboard</CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[180px]">
+              <ScrollArea>
                 {[
                   { name: "wasd", rating: 2150 },
                   { name: "target switcher", rating: 2080 },
                   { name: "demon1", rating: 2045 },
                   { name: "auswern", rating: 1990 },
-                  { name: "Nora", rating: 800 },
+                  { name: "mitsu", rating: 1980 },
                 ].map((user, index) => (
                   <div key={index} className="flex justify-between items-center mb-2">
                     <span>
@@ -177,7 +208,7 @@ export default function Index() {
           {[
             { name: "tourist", rating: 2200, badge: "Grandmaster" },
             { name: "bgates", rating: 2180, badge: "Master" },
-            { name: "al0rante", rating: 2150, badge: "Expert" },
+            { name: "wasd", rating: 2150, badge: "Expert" },
           ].map((user, index) => (
             <div key={index} className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
