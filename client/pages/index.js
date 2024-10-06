@@ -6,11 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Zap, Code, Users, Swords, Sword, History } from "lucide-react"
+import { Swords } from "lucide-react"
 import { useState } from "react"
 import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { BattlePopup } from "@/components/battlePopup"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { LeftSidebar } from "@/components/LeftSidebar"
 
 export default function Index() {
   const [username, setUsername] = useState("abg slayer")
@@ -19,11 +20,11 @@ export default function Index() {
   const [nextRank, setNextRank] = useState("Expert")
 
   const recentMatches = [
-    { opponent: "pandyrew", rating: 1900, result: "Win", ratingChange: 25 },
-    { opponent: "scarface", rating: 1800, result: "Loss", ratingChange: -18 },
-    { opponent: "jshawty", rating: 1850, result: "Win", ratingChange: 22 },
-    { opponent: "kanade", rating: 1820, result: "Win", ratingChange: 20 },
-    { opponent: "tourist", rating: 1800, result: "Loss", ratingChange: -15 },
+    { opponent: "wasd", rating: 1900, result: "Win", ratingChange: 25 },
+    { opponent: "demon1", rating: 1800, result: "Loss", ratingChange: -18 },
+    { opponent: "target switcher", rating: 1850, result: "Win", ratingChange: 22 },
+    { opponent: "jshawty", rating: 1820, result: "Win", ratingChange: 20 },
+    { opponent: "tourist", rating: 2200, result: "Loss", ratingChange: -15 },
   ]
 
   const ratingData = [
@@ -46,41 +47,7 @@ export default function Index() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-64 border-r p-4 flex flex-col">
-        <div className="flex items-center space-x-2 mb-6">
-          <Sword className="h-6 w-6" />
-          <h2 className="font-bold text-xl">CodeBattles</h2>
-        </div>
-        <nav className="space-y-2 mb-6">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start">
-                <Swords className="mr-2 h-4 w-4" />
-                Battle
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Battle Options</DialogTitle>
-              </DialogHeader>
-              <BattlePopup />
-            </DialogContent>
-          </Dialog>
-          <Button variant="ghost" className="w-full justify-start">
-            <Code className="mr-2 h-4 w-4" />
-            Practice
-          </Button>
-          <Button variant="ghost" className="w-full justify-start">
-            <Users className="mr-2 h-4 w-4" />
-            Friends
-          </Button>
-          <Button variant="ghost" className="w-full justify-start">
-            <History className="mr-2 h-4 w-4" />
-            Battle History
-          </Button>
-        </nav>
-      </div>
+      <LeftSidebar />
       {/* Main Content */}
       <div className="flex-1 p-6">
         <header className="mb-6">
@@ -183,9 +150,9 @@ export default function Index() {
             <CardContent>
               <ScrollArea>
                 {[
-                  { name: "wasd", rating: 2150 },
-                  { name: "target switcher", rating: 2080 },
-                  { name: "demon1", rating: 2045 },
+                  { name: "bgates", rating: 2180 },
+                  { name: "pandyrew", rating: 2080 },
+                  { name: "scarface", rating: 2045 },
                   { name: "auswern", rating: 1990 },
                   { name: "mitsu", rating: 1980 },
                 ].map((user, index) => (
@@ -208,7 +175,7 @@ export default function Index() {
           {[
             { name: "tourist", rating: 2200, badge: "Grandmaster" },
             { name: "bgates", rating: 2180, badge: "Master" },
-            { name: "wasd", rating: 2150, badge: "Expert" },
+            { name: "blank", rating: 2150, badge: "Expert" },
           ].map((user, index) => (
             <div key={index} className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
@@ -228,9 +195,9 @@ export default function Index() {
         <h3 className="font-semibold mb-4">Friends</h3>
         <div className="space-y-4">
           {[
-            { name: "Bob", status: "Online" },
-            { name: "Alice", status: "In Battle" },
-            { name: "Charlie", status: "Offline" },
+            { name: "pandyrew", status: "Online" },
+            { name: "scarface", status: "In Battle" },
+            { name: "mitsu", status: "Offline" },
           ].map((opponent, index) => (
             <div key={index} className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
