@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from "react"
+import Link from "next/link" // Add this import
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -43,10 +44,14 @@ export function BattlePopup() {
                   </div>
                 </div>
               </div>
-              <Button className="w-full">
-                <Swords className="mr-2 h-4 w-4" />
-                Find Battle
-              </Button>
+              <Link href="/battle-page" passHref legacyBehavior>
+                <Button className="w-full" asChild>
+                  <a>
+                    <Swords className="mr-2 h-4 w-4" />
+                    Find Battle
+                  </a>
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </TabsContent>
@@ -73,5 +78,5 @@ export function BattlePopup() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
