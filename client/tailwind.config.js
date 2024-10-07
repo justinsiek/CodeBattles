@@ -58,6 +58,15 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
+  		},
+  		keyframes: {
+  			hop: {
+  				'0%, 100%': { transform: 'translateY(0)' },
+  				'50%': { transform: 'translateY(-3px)' },
+  			}
+  		},
+  		animation: {
+  			hop: 'hop 0.3s ease-in-out',
   		}
   	}
   },

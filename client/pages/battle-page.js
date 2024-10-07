@@ -13,7 +13,7 @@ const INITIAL_CODE = `def twoSum(self, nums, target):
     pass`
 
 export default function BattlePage() {
-  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(300) 
   const [code, setCode] = useState(INITIAL_CODE)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -39,7 +39,7 @@ export default function BattlePage() {
     <div className="h-screen p-4 flex flex-col">
       <div className="flex gap-4 flex-grow">
         <div className="w-1/2 flex flex-col gap-4">
-          <Card className="flex-grow flex flex-col">
+          <Card className="flex-grow flex flex-col h-3/4">
             <CardHeader className="flex-shrink-0">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-2xl">Two Sum</CardTitle>
@@ -75,7 +75,7 @@ export default function BattlePage() {
             </CardContent>
           </Card>
 
-          <Card className="flex-shrink-0">
+          <Card className="flex-shrink-0 h-1/4">
             <CardHeader>
               <CardTitle className="text-xl">Opponent</CardTitle>
             </CardHeader>
@@ -105,7 +105,7 @@ export default function BattlePage() {
                  />
             </div>
             <div className="mt-4 flex justify-end">
-              <Button onClick={handleSubmit} disabled={isSubmitted || timeLeft === 0}>
+              <Button onClick={handleSubmit} disabled={isSubmitted || timeLeft === 0} className="group">
                 {isSubmitted ? (
                   <>
                     <Check className="mr-2 h-4 w-4" />
@@ -113,7 +113,7 @@ export default function BattlePage() {
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4 transition-transform hover:rotate-45" />
+                    <Send className="mr-2 h-4 w-4 transition-transform group-hover:rotate-45" />
                     Submit Solution
                   </>
                 )}
