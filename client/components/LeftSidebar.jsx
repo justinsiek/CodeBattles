@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button"
 import { Sword, Swords, Code, Users, History } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { BattlePopup } from "@/components/battlePopup"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
-export function LeftSidebar() {
+export function LeftSidebar( {username, rating} ) {
   return (
     <div className="w-64 border-r p-4 flex flex-col">
       <div className="flex items-center space-x-2 mb-6 group">
@@ -38,6 +39,18 @@ export function LeftSidebar() {
           Battle History
         </Button>
       </nav>
+      <div className="mt-auto">
+        <div className="flex items-center space-x-4 mb-6">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src="/avatars/01.png" alt="@username" />
+            <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h2 className="font-semibold">{username}</h2>
+            <p className="text-sm text-muted-foreground">Rating: {rating}</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

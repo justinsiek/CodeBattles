@@ -12,13 +12,24 @@ import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "rec
 import { BattlePopup } from "@/components/battlePopup"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { LeftSidebar } from "@/components/LeftSidebar"
+import LoginPage from '@/components/login'
 
 export default function Index() {
-  const [username, setUsername] = useState("abg slayer")
+  const [username, setUsername] = useState(null)
   const [rating, setRating] = useState(1850)
   const [currentRank, setCurrentRank] = useState("Elite")
   const [nextRank, setNextRank] = useState("Expert")
 
+  const handleLogin = (username) => {
+    setUsername(username)
+  }
+
+  if (!username) {
+    return <LoginPage onLogin={handleLogin} />
+  }
+
+
+  
   const recentMatches = [
     { opponent: "wasd", rating: 1900, result: "Win", ratingChange: 25 },
     { opponent: "demon1", rating: 1800, result: "Loss", ratingChange: -18 },
@@ -47,7 +58,7 @@ export default function Index() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <LeftSidebar />
+      <LeftSidebar username={username} rating={rating} />
       {/* Main Content */}
       <div className="flex-1 p-6">
         <header className="mb-6">
