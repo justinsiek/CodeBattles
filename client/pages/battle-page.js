@@ -56,7 +56,8 @@ export default function BattlePage() {
             <CardHeader className="flex-shrink-0">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-2xl">Two Sum</CardTitle>
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 transition-all duration-300 ease-in-out
+                   ${timeLeft <= 20 ? "text-white bg-red-500 rounded-lg px-2" : ""}`}>
                   <Clock className="h-4 w-4" />
                   <span className="text-lg font-mono">{formatTime(timeLeft)}</span>
                 </div>
@@ -143,7 +144,7 @@ export default function BattlePage() {
             </CardContent>
           </Card>
 
-          <Card className="flex-shrink-0 h-1/4">
+          <Card className={`flex-shrink-0 h-1/4 ${allPassed ? "border-green-300 border-2 border-opacity-50" : ""}`}>
             <CardHeader>
               <CardTitle className="text-xl">Submission Status</CardTitle>
             </CardHeader>

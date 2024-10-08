@@ -9,7 +9,7 @@ import requests
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}})
 
 DB_NAME = 'postgres'
 DB_USER = 'write_user'
@@ -21,17 +21,20 @@ DB_PORT = '5432'
 def test_code():
     user_code = request.args.get('user_code', default='pass', type=str)
 
-    #url = "https://judge0-ce.p.rapidapi.com"
-    url = "https://judge029.p.rapidapi.com"
+    url = "https://judge0-ce.p.rapidapi.com"
+    #url = "https://judge029.p.rapidapi.com"
 
-    rapidapi_key = os.getenv('OTHER_RAPIDAPI_KEY')
+    rapidapi_key = os.getenv('RAPIDAPI_KEY')
+    #rapidapi_key = os.getenv('OTHER_RAPIDAPI_KEY')
 
     headers = {
         "X-RapidAPI-Key": rapidapi_key,
-        #"X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-        "X-RapidAPI-Host": "judge029.p.rapidapi.com",
+        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+        #"X-RapidAPI-Host": "judge029.p.rapidapi.com",
         "Content-Type": "application/json"
     }
+
+    results = {"passed_tests": 0, "all_passed": False, "error" : None}
 
     full_code = f"""
 import json
@@ -109,17 +112,9 @@ print(json.dumps({{"test_results": run_tests()}}))
             output_json = json.loads(stdout)
             test_results = output_json.get("test_results", [])
 
-            results = {}
-
             passed_tests = sum(result['passed'] for result in test_results)
             total_tests = len(test_results)
-            failed_tests = []
-
-            for result in test_results:
-                if not result['passed']:
-                    print(result)
             
-
             results['passed_tests'] = passed_tests
             results['all_passed'] = passed_tests == total_tests
 
@@ -130,7 +125,8 @@ print(json.dumps({{"test_results": run_tests()}}))
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
         if http_err.response.status_code == 429:
-            return jsonify({'error': 'API rate limit exceeded. Please try again later.'})
+            results['error'] = 'API rate limit exceeded. Please try again later.'
+            return jsonify(results)
         return jsonify({'error': f'HTTP error: {http_err}'})
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
