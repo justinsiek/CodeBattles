@@ -6,16 +6,16 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 export function LeftSidebar( {username, rating} ) {
   return (
-    <div className="w-64 border-r p-4 flex flex-col">
-      <div className="flex items-center space-x-2 mb-6 group">
-        <Sword className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
+    <div className="w-64 border-r pt-4 px-4 flex flex-col">
+      <div className="flex items-center space-x-2 mb-6">
+        <Swords className="h-6 w-6" />
         <h2 className="font-bold text-xl">CodeBattles</h2>
       </div>
       <nav className="space-y-2 mb-6">
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="ghost" className="w-full justify-start group">
-              <Swords className="mr-2 h-4 w-4 transition-all duration-300 ease-in-out group-hover:animate-hop" />
+              <Sword className="mr-2 h-4 w-4 transition-all duration-300 ease-in-out group-hover:rotate-90" />
               Battle
             </Button>
           </DialogTrigger>
