@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Clock, Send, User, Check } from "lucide-react"
+import { Clock, Send, User } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import CodeEditor from '@/components/codeEditor'
 import { Progress } from "@/components/ui/progress"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
 const INITIAL_CODE = `def twoSum(nums, target):
     # Write your solution here
@@ -19,6 +20,7 @@ export default function BattlePage() {
   const [submissionsLeft, setSubmissionsLeft] = useState(3)
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -36,7 +38,9 @@ export default function BattlePage() {
   const handleSubmit = () => {
     if (submissionsLeft > 0) {
       setSubmissionsLeft(submissionsLeft - 1)
-      console.log('Submitted code:', code)
+      setAllPassed(false)
+      setPassedTests(0)
+      setError(null)
       const encodedCode = encodeURIComponent(code)
       fetch('http://localhost:8080/api/testcode?user_code=' + encodedCode)
         .then(response => response.json())
@@ -44,6 +48,10 @@ export default function BattlePage() {
           console.log("returned data", data)
           setAllPassed(data.all_passed)
           setPassedTests(data.passed_tests)
+          setError(data.error || null)
+        }).catch(error => {
+          console.error('Error:', error)
+          setError(error.message || 'An error occurred while submitting your solution. Please try again.')
         })
     }
   }
@@ -144,16 +152,23 @@ export default function BattlePage() {
             </CardContent>
           </Card>
 
-          <Card className={`flex-shrink-0 h-1/4 ${allPassed ? "border-green-300 border-2 border-opacity-50" : ""}`}>
+          <Card className={'flex-shrink-0 h-1/4'}>
             <CardHeader>
               <CardTitle className="text-xl">Submission Status</CardTitle>
             </CardHeader>
             <CardContent>
+              {error ? (
+                <Alert className="border-red-500">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : (
                 <div className="text-center h-full">
                     <h2 className="text-4xl font-bold mb-2">{passedTests}/11</h2>
                     <p className="text-xl text-muted-foreground">Test Cases Passed</p>
                     <Progress value={passedTests/11*100} max={11} className="w-full h-2 mt-6" />
                 </div>
+              )}
             </CardContent>
           </Card>
         </div>

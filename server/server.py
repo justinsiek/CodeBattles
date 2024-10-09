@@ -107,6 +107,8 @@ print(json.dumps({{"test_results": run_tests()}}))
 
         stdout = status.get("stdout", "")
         stderr = status.get("stderr", "")
+        if stderr:
+            stderr = stderr.strip().split('\n')[-1]
 
         if stdout:
             output_json = json.loads(stdout)
@@ -119,7 +121,7 @@ print(json.dumps({{"test_results": run_tests()}}))
             results['all_passed'] = passed_tests == total_tests
 
             return jsonify(results)  
-        else:
+        else: #this is where the main error handling is
             print(f"Error: No stdout received. Full status: {status}")
             return jsonify({'error': stderr or 'No output received from the API'})
     except requests.exceptions.HTTPError as http_err:
