@@ -20,17 +20,38 @@ DB_PORT = '5432'
 @app.route('/api/retrieveproblem', methods=['GET'])
 def retrieve_problem():
     problem_id = request.args.get('problem', default=1, type=int)
-    problem = {}
-    problem['title'] = "Two Sum"
-    problem['description'] = [
-        "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-        "You may assume that each input would have exactly one solution, and you may not use the same element twice.",
-        "You can return the answer in any order.",
-    ]
-    problem['examples'] = [["Input: nums = [2,7,11,15], target = 9", "Output: [0,1]", "Explanation: Because nums[0] + nums[1] == 9, we return [0, 1]."],
-                            ["Input: nums = [3,2,4], target = 6", "Output: [1,2]"],
-                            ["Input: nums = [3,3], target = 6", "Output: [0,1]"]]
-    problem['starter_code'] = "def twoSum(nums, target):\n\tpass"
+
+    try:
+        conn = psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT
+        )
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM codebattles.problems WHERE problem_id = %s", (problem_id,))
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({'error': f'Database error: {e}'})
+        
+    if result:
+        problem_id, title, difficulty, description, examples, starter_code, test_cases = result
+        
+        problem = {
+            'problem_id': problem_id,
+            'title': title,
+            'difficulty': difficulty,
+            'description': description,  
+            'examples': examples,  
+            'starter_code': starter_code,
+            'test_cases': test_cases
+        }
 
     return jsonify(problem)
 
