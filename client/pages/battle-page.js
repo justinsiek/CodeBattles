@@ -58,7 +58,7 @@ export default function BattlePage() {
       setError(null)
       setIsLoading(true)
       const encodedCode = encodeURIComponent(code)
-      fetch('http://localhost:8080/api/testcode?user_code=' + encodedCode)
+      fetch('http://localhost:8080/api/testcode?user_code=' + encodedCode + '&problem_id=' + problem)
         .then(response => response.json())
         .then(data => {
           setIsLoading(false)

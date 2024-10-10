@@ -58,7 +58,7 @@ def retrieve_problem():
 @app.route('/api/testcode', methods=['GET'])
 def test_code():
     user_code = request.args.get('user_code', default='pass', type=str)
-
+    problem_id = request.args.get('problem_id', default=1, type=int)
     url = "https://judge0-ce.p.rapidapi.com"
     #url = "https://judge029.p.rapidapi.com"
 
@@ -74,37 +74,28 @@ def test_code():
 
     results = {"passed_tests": 0, "all_passed": False, "error" : None}
 
-    test_cases = """def run_tests():
-\n\ttest_cases = [
-\n\t\t([2, 7, 11, 15], 9, [0, 1]),
-\n\t\t([3, 2, 4], 6, [1, 2]),
-\n\t\t([3, 2], 5, [0, 1]),
-\n\t\t([1, 5, 3, 8], 11, [2, 3]),
-\n\t\t([-1, 0, 2, 3], 5, [2, 3]),
-\n\t\t([1, 6, 4, 4], 8, [2, 3]),
-\n\t\t([1, 2, 3, 4, 5], 9, [3, 4]),
-\n\t\t([0, 1, 4, 3], 3, [0, 3]),
-\n\t\t([-3, 4, 3], 0, [0, 2]), 
-\n\t\t([10, 5, 2, 3, 7, 6], 13, [0, 3]),
-\n\t\t([-1, -2, -3, -4, -5], -8, [2, 4])
-\n\t]
-    
-\n\tresults = []
-\n\tfor i, (nums, target, expected_output) in enumerate(test_cases, 1):
-\n\t\tactual_output = twoSum(nums, target)
-\n\t\tpassed = sorted(actual_output) == sorted(expected_output)
-\n\t\tresults.append({
-\n\t\t\t"test_case": i,
-\n\t\t\t"input": {"nums": nums, "target": target},
-\n\t\t\t"expected": expected_output,
-\n\t\t\t"actual": actual_output,
-\n\t\t\t"passed": passed
-\n\t\t})
-    
-\n\treturn results
+    try:
+        conn = psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT
+        )
+        cursor = conn.cursor()
 
-print(json.dumps({"test_results": run_tests()}))
-"""
+        cursor.execute("SELECT test_cases FROM codebattles.problems WHERE problem_id = %s", (problem_id,))
+        test_cases = cursor.fetchone()[0]
+
+        cursor.close()
+        conn.close()
+    except psycopg2.Error as e:
+        results['error'] = f'Database error: {e}'
+        return jsonify(results)
+    
+    print(test_cases)
+
+        
 
 
     full_code = f"""
