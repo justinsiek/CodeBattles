@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import CodeEditor from '@/components/codeEditor'
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Loader2 } from "lucide-react" 
 
 export default function BattlePage() {
   const [timeLeft, setTimeLeft] = useState(300) 
@@ -21,6 +22,8 @@ export default function BattlePage() {
   const [title, setTitle] = useState(null)
   const [description, setDescription] = useState([])
   const [examples, setExamples] = useState([])
+  const [starterCode, setStarterCode] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
@@ -30,6 +33,7 @@ export default function BattlePage() {
         setTitle(data.title)
         setDescription(data.description)
         setExamples(data.examples)
+        setStarterCode(data.starter_code)
       })
   }, [])
 
@@ -52,17 +56,21 @@ export default function BattlePage() {
       setAllPassed(false)
       setPassedTests(0)
       setError(null)
+      setIsLoading(true)
       const encodedCode = encodeURIComponent(code)
       fetch('http://localhost:8080/api/testcode?user_code=' + encodedCode)
         .then(response => response.json())
         .then(data => {
-          console.log("returned data", data)
+          setIsLoading(false)
           setAllPassed(data.all_passed)
-          setPassedTests(data.passed_tests)
           setError(data.error || null)
+          setTimeout(() => {
+            setPassedTests(data.passed_tests)
+          }, 250) //for the animation
         }).catch(error => {
           console.error('Error:', error)
           setError(error.message || 'An error occurred while submitting your solution. Please try again.')
+          setIsLoading(false) 
         })
     }
   }
@@ -142,7 +150,8 @@ export default function BattlePage() {
             <CardContent className="flex-grow flex flex-col">
               <div className="flex-grow">
                 <CodeEditor
-                  defaultValue={code}
+                  key={starterCode}
+                  defaultValue={starterCode}
                   onChange={setCode}
                 />
               </div>
@@ -169,16 +178,20 @@ export default function BattlePage() {
               <CardTitle className="text-xl">Submission Status</CardTitle>
             </CardHeader>
             <CardContent>
-              {error ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : error ? (
                 <Alert className="border-red-500">
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               ) : (
                 <div className="text-center h-full">
-                    <h2 className="text-4xl font-bold mb-2">{passedTests}/11</h2>
-                    <p className="text-xl text-muted-foreground">Test Cases Passed</p>
-                    <Progress value={passedTests/11*100} max={11} className="w-full h-2 mt-6" />
+                  <h2 className="text-4xl font-bold mb-2">{passedTests}/11</h2>
+                  <p className="text-xl text-muted-foreground">Test Cases Passed</p>
+                  <Progress value={passedTests/11*100} max={11} className="w-full h-2 mt-6" />
                 </div>
               )}
             </CardContent>

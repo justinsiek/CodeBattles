@@ -17,7 +17,7 @@ const CodeEditor = ({ defaultValue, onChange }) => {
       <Editor
         height="90%"
         defaultLanguage="python"
-        defaultValue={defaultValue}
+        defaultValue={ defaultValue }
         options={editorOptions}
         onChange={ onChange }
       />
