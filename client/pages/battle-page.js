@@ -18,8 +18,9 @@ export default function BattlePage() {
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
   const [error, setError] = useState(null)
-  const problem = 1
+  const problem = 2
   const [title, setTitle] = useState(null)
+  const [difficulty, setDifficulty] = useState(null)
   const [description, setDescription] = useState([])
   const [examples, setExamples] = useState([])
   const [starterCode, setStarterCode] = useState("")
@@ -31,6 +32,7 @@ export default function BattlePage() {
       .then(data => {
         setCode(data.starter_code)
         setTitle(data.title)
+        setDifficulty(data.difficulty)
         setDescription(data.description)
         setExamples(data.examples)
         setStarterCode(data.starter_code)
@@ -98,14 +100,14 @@ export default function BattlePage() {
           <Card className="flex-grow flex flex-col h-3/4">
             <CardHeader className="flex-shrink-0">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-2xl">Two Sum</CardTitle>
+                <CardTitle className="text-2xl">{title}</CardTitle>
                 <div className={`flex items-center space-x-2 transition-all duration-300 ease-in-out
                    ${timeLeft <= 20 ? "text-white bg-red-500 rounded-lg px-2" : ""}`}>
                   <Clock className="h-4 w-4" />
                   <span className="text-lg font-mono">{formatTime(timeLeft)}</span>
                 </div>
               </div>
-              <CardDescription>Difficulty: Easy</CardDescription>
+              <CardDescription>Difficulty: {difficulty}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
               <ScrollArea className="h-full">

@@ -54,6 +54,24 @@ def retrieve_problem():
         }
 
     return jsonify(problem)
+'''
+@app.route('/api/retrieveproblem', methods=['GET'])
+def retrieve_problem():
+    #problem_id = request.args.get('problem', default=1, type=int)
+    problem = {}
+    problem['title'] = "Group Anagrams"
+    problem['difficulty'] = "Medium"
+    problem['description'] = [
+        "Given an array of strings strs, group the anagrams together.",
+        "You can return the answer in any order.",
+    ]
+    problem['examples'] = [["Input: strs = ['eat','tea','tan','ate','nat','bat']", "Output: [['eat','tea','ate'],['tan','nat'],['bat']]", "Explanation: 'eat', 'tea', and 'ate' are anagrams of each other, as are 'tan' and 'nat'."],
+                            ["Input: strs = ['']", "Output: [['']]"],
+                            ["Input: strs = ['a']", "Output: [['a']]"]]
+    problem['starter_code'] = """def groupAnagrams(strs): 
+    pass"""
+    return jsonify(problem)
+'''
 
 @app.route('/api/testcode', methods=['GET'])
 def test_code():
@@ -73,7 +91,7 @@ def test_code():
     }
 
     results = {"passed_tests": 0, "all_passed": False, "error" : None}
-
+    
     try:
         conn = psycopg2.connect(
             dbname=DB_NAME,
@@ -92,10 +110,44 @@ def test_code():
     except psycopg2.Error as e:
         results['error'] = f'Database error: {e}'
         return jsonify(results)
-    
-    print(test_cases)
 
-        
+
+    '''
+    test_cases = """def run_tests():
+\ttest_cases = [
+\t\t(["eat","tea","tan","ate","nat","bat"], [["eat","tea","ate"],["tan","nat"],["bat"]]),
+\t\t([""], [[""]]),
+\t\t(["hello", "olleh", "world", "dlrow"], [["hello", "olleh"], ["world", "dlrow"]]),
+\t\t(["a"], [["a"]]),
+\t\t(["abc","cba","bac","foo","oof"], [["abc","cba","bac"],["foo","oof"]]),
+\t\t(["listen","silent","enlist","inlets"], [["listen","silent","enlist","inlets"]]),
+\t\t(["cat","dog","act","god"], [["cat","act"],["dog","god"]]),
+\t\t(["","b"], [[""],["b"]]),
+\t\t(["cab","tin","pew","duh","may","ill","buy","bar","max","doc"], [["cab"],["tin"],["pew"],["duh"],["may"],["ill"],["buy"],["bar"],["max"],["doc"]]),
+\t\t(["eat","tea","tan","ate","nat","bat","cat","tac"], [["eat","tea","ate"],["tan","nat"],["bat"],["cat","tac"]]),
+\t\t(["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"], [["a"],["b"],["c"],["d"],["e"],["f"],["g"],["h"],["i"],["j"],["k"],["l"],["m"],["n"],["o"],["p"],["q"],["r"],["s"],["t"],["u"],["v"],["w"],["x"],["y"],["z"]]),
+\t]
+    
+\tresults = []
+\tfor i, (strs, expected_output) in enumerate(test_cases, 1):
+\t\tactual_output = groupAnagrams(strs)
+        # Sort the inner lists and the outer list for consistent comparison
+\t\tactual_sorted = sorted([sorted(group) for group in actual_output])
+\t\texpected_sorted = sorted([sorted(group) for group in expected_output])
+\t\tpassed = actual_sorted == expected_sorted
+\t\tresults.append({
+\t\t\t"test_case": i,
+\t\t\t"input": {"strs": strs},
+\t\t\t"expected": expected_output,
+\t\t\t"actual": actual_output,
+\t\t\t"passed": passed
+\t\t})
+    
+\treturn results
+
+print(json.dumps({"test_results": run_tests()}))
+"""
+    '''
 
 
     full_code = f"""
@@ -145,13 +197,12 @@ import json
         if stdout:
             output_json = json.loads(stdout)
             test_results = output_json.get("test_results", [])
-
+            print(test_results)
             passed_tests = sum(result['passed'] for result in test_results)
             total_tests = len(test_results)
             
             results['passed_tests'] = passed_tests
             results['all_passed'] = passed_tests == total_tests
-
             return jsonify(results)  
         else: #this is where the main error handling is
             print(f"Error: No stdout received. Full status: {status}")
