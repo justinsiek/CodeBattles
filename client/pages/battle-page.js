@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -10,17 +10,28 @@ import CodeEditor from '@/components/codeEditor'
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
-const INITIAL_CODE = `def twoSum(nums, target):
-    # Write your solution here
-    pass`
-
 export default function BattlePage() {
   const [timeLeft, setTimeLeft] = useState(300) 
-  const [code, setCode] = useState(INITIAL_CODE)
+  const [code, setCode] = useState("")
   const [submissionsLeft, setSubmissionsLeft] = useState(3)
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
   const [error, setError] = useState(null)
+  const problem = 1
+  const [title, setTitle] = useState(null)
+  const [description, setDescription] = useState([])
+  const [examples, setExamples] = useState([])
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
+      .then(response => response.json())
+      .then(data => {
+        setTitle(data.title)
+        setDescription(data.description)
+        setExamples(data.examples)
+        setCode(data.starter_code)
+      })
+  }, [])
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -56,6 +67,22 @@ export default function BattlePage() {
     }
   }
 
+  const renderExample = (example, index) => {
+    return (
+      <div key={index}>
+        <h3 className="font-semibold mt-2 mb-1">Example {index + 1}:</h3>
+        <pre className="bg-muted p-2 rounded text-sm">
+          {example.map((line, lineIndex) => (
+            <React.Fragment key={lineIndex}>
+              {line}
+              {lineIndex < example.length - 1 && '\n'}
+            </React.Fragment>
+          ))}
+        </pre>
+      </div>
+    );
+  };
+
   return (
     <div className="h-screen p-4 flex flex-col">
       <div className="flex gap-4 flex-grow">
@@ -74,25 +101,10 @@ export default function BattlePage() {
             </CardHeader>
             <CardContent className="flex-grow overflow-auto">
               <ScrollArea className="h-full">
-                <p className="mb-2">Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.</p>
-                <p className="mb-2">You may assume that each input would have exactly one solution, and you may not use the same element twice.</p>
-                <p className="mb-2">You can return the answer in any order.</p>
-                <h3 className="font-semibold mt-2 mb-1">Example 1:</h3>
-                <pre className="bg-muted p-2 rounded text-sm">
-                  Input: nums = [2,7,11,15], target = 9{'\n'}
-                  Output: [0,1]{'\n'}
-                  Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
-                </pre>
-                <h3 className="font-semibold mt-2 mb-1">Example 2:</h3>
-                <pre className="bg-muted p-2 rounded text-sm">
-                  Input: nums = [3,2,4], target = 6{'\n'}
-                  Output: [1,2]{'\n'}
-                </pre>
-                <h3 className="font-semibold mt-2 mb-1">Example 3:</h3>
-                <pre className="bg-muted p-2 rounded text-sm">
-                  Input: nums = [3,3], target = 6{'\n'}
-                  Output: [0,1]{'\n'}
-                </pre>
+                {description.map((paragraph, index) => (
+                  <p key={index} className="mb-2">{paragraph}</p>
+                ))}
+                {examples.map((example, index) => renderExample(example, index))}
               </ScrollArea>
             </CardContent>
           </Card>
