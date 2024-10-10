@@ -59,16 +59,16 @@ def retrieve_problem():
 def retrieve_problem():
     #problem_id = request.args.get('problem', default=1, type=int)
     problem = {}
-    problem['title'] = "Group Anagrams"
+    problem['title'] = "Top K Frequent Elements"
     problem['difficulty'] = "Medium"
     problem['description'] = [
-        "Given an array of strings strs, group the anagrams together.",
+        "Given an integer array nums and an integer k, return the k most frequent elements.",
+        "It is guaranteed that the answer is unique.",
         "You can return the answer in any order.",
     ]
-    problem['examples'] = [["Input: strs = ['eat','tea','tan','ate','nat','bat']", "Output: [['eat','tea','ate'],['tan','nat'],['bat']]", "Explanation: 'eat', 'tea', and 'ate' are anagrams of each other, as are 'tan' and 'nat'."],
-                            ["Input: strs = ['']", "Output: [['']]"],
-                            ["Input: strs = ['a']", "Output: [['a']]"]]
-    problem['starter_code'] = """def groupAnagrams(strs): 
+    problem['examples'] = [["Input: nums = [1,1,1,2,2,3], k = 2", "Output: [1,2]"],
+                            ["Input: nums = [1], k = 1", "Output: [1]"]]
+    problem['starter_code'] = """def topKFrequent(nums, k): 
     pass"""
     return jsonify(problem)
 '''
@@ -110,44 +110,49 @@ def test_code():
     except psycopg2.Error as e:
         results['error'] = f'Database error: {e}'
         return jsonify(results)
-
-
     '''
+
+    
     test_cases = """def run_tests():
-\ttest_cases = [
-\t\t(["eat","tea","tan","ate","nat","bat"], [["eat","tea","ate"],["tan","nat"],["bat"]]),
-\t\t([""], [[""]]),
-\t\t(["hello", "olleh", "world", "dlrow"], [["hello", "olleh"], ["world", "dlrow"]]),
-\t\t(["a"], [["a"]]),
-\t\t(["abc","cba","bac","foo","oof"], [["abc","cba","bac"],["foo","oof"]]),
-\t\t(["listen","silent","enlist","inlets"], [["listen","silent","enlist","inlets"]]),
-\t\t(["cat","dog","act","god"], [["cat","act"],["dog","god"]]),
-\t\t(["","b"], [[""],["b"]]),
-\t\t(["cab","tin","pew","duh","may","ill","buy","bar","max","doc"], [["cab"],["tin"],["pew"],["duh"],["may"],["ill"],["buy"],["bar"],["max"],["doc"]]),
-\t\t(["eat","tea","tan","ate","nat","bat","cat","tac"], [["eat","tea","ate"],["tan","nat"],["bat"],["cat","tac"]]),
-\t\t(["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"], [["a"],["b"],["c"],["d"],["e"],["f"],["g"],["h"],["i"],["j"],["k"],["l"],["m"],["n"],["o"],["p"],["q"],["r"],["s"],["t"],["u"],["v"],["w"],["x"],["y"],["z"]]),
-\t]
+    test_cases = [
+        ([1,1,1,2,2,3], 2, [1,2]),
+        ([1], 1, [1]),
+        ([1,2,2,3,3,3], 2, [3,2]),
+        ([4,1,-1,2,-1,2,3], 2, [-1,2]),
+        ([1,1,1,2,2,3,3,3], 3, [1,2,3]),
+        ([5,3,1,1,1,3,73,1], 2, [1,3]),
+        ([3,0,1,0], 1, [0]),
+        ([1,2], 2, [1,2]),
+        ([1, 2, 3, 4, 5], 5, [1,2,3,4,5]),
+        ([1, 2, 3, 4, 5], 0, []),
+        ([1, 1, 1, 2, 2, 2, 3, 3, 3, 4], 3, [1,2,3])
+    ]
     
-\tresults = []
-\tfor i, (strs, expected_output) in enumerate(test_cases, 1):
-\t\tactual_output = groupAnagrams(strs)
-        # Sort the inner lists and the outer list for consistent comparison
-\t\tactual_sorted = sorted([sorted(group) for group in actual_output])
-\t\texpected_sorted = sorted([sorted(group) for group in expected_output])
-\t\tpassed = actual_sorted == expected_sorted
-\t\tresults.append({
-\t\t\t"test_case": i,
-\t\t\t"input": {"strs": strs},
-\t\t\t"expected": expected_output,
-\t\t\t"actual": actual_output,
-\t\t\t"passed": passed
-\t\t})
+    results = []
+    for i, (nums, k, expected_output) in enumerate(test_cases, 1):
+        actual_output = topKFrequent(nums, k)
+        if actual_output is None:
+            passed = False
+            actual_set = None
+        else:   
+            # Convert to sets for unordered comparison
+            actual_set = set(actual_output)
+            expected_set = set(expected_output)
+            passed = actual_set == expected_set and len(actual_output) == len(expected_output)
+        results.append({
+            "test_case": i,
+            "input": {"nums": nums, "k": k},
+            "expected": expected_output,
+            "actual": actual_output,
+            "passed": passed
+        })
     
-\treturn results
+    return results
 
 print(json.dumps({"test_results": run_tests()}))
 """
-    '''
+'''
+    
 
 
     full_code = f"""
@@ -192,6 +197,7 @@ import json
         stdout = status.get("stdout", "")
         stderr = status.get("stderr", "")
         if stderr:
+            print(f"Error: {stderr}")
             stderr = stderr.strip().split('\n')[-1]
 
         if stdout:

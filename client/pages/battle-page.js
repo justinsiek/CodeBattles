@@ -18,7 +18,7 @@ export default function BattlePage() {
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
   const [error, setError] = useState(null)
-  const problem = 2
+  const problem = 3
   const [title, setTitle] = useState(null)
   const [difficulty, setDifficulty] = useState(null)
   const [description, setDescription] = useState([])
@@ -68,7 +68,7 @@ export default function BattlePage() {
           setError(data.error || null)
           setTimeout(() => {
             setPassedTests(data.passed_tests)
-          }, 250) //for the animation
+          }, 200) //for the animation
         }).catch(error => {
           console.error('Error:', error)
           setError(error.message || 'An error occurred while submitting your solution. Please try again.')
@@ -181,8 +181,9 @@ export default function BattlePage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex flex-col space-y-2 items-center justify-center h-full">
                   <Loader2 className="h-8 w-8 animate-spin" />
+                  <p className="text-md text-muted-foreground">Submitting...</p>
                 </div>
               ) : error ? (
                 <Alert className="border-red-500">
