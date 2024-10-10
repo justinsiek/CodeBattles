@@ -26,10 +26,10 @@ export default function BattlePage() {
     fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
       .then(response => response.json())
       .then(data => {
+        setCode(data.starter_code)
         setTitle(data.title)
         setDescription(data.description)
         setExamples(data.examples)
-        setCode(data.starter_code)
       })
   }, [])
 
