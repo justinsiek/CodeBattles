@@ -10,6 +10,7 @@ import CodeEditor from '@/components/codeEditor'
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react" 
+import Head from 'next/head'
 
 export default function BattlePage() {
   const [timeLeft, setTimeLeft] = useState(300) 
@@ -94,8 +95,12 @@ export default function BattlePage() {
   };
 
   return (
-    <div className="h-screen p-4 flex flex-col">
-      <div className="flex gap-4 flex-grow">
+    <>
+      <Head>
+        <title>{title} | CodeBattles</title>
+      </Head>
+      <div className="h-screen p-4 flex flex-col">
+        <div className="flex gap-4 flex-grow">
         <div className="w-1/2 flex flex-col gap-4">
           <Card className="flex-grow flex flex-col h-3/4">
             <CardHeader className="flex-shrink-0">
@@ -202,5 +207,6 @@ export default function BattlePage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

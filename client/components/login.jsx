@@ -52,7 +52,7 @@ export default function LoginPage({ onLogin } ) {
               />
             </div>
             <Button type="submit" className="w-full group">
-              <Sword className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
+              <Sword className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
               Enter the Arena
             </Button>
           </form>

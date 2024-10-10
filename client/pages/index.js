@@ -13,6 +13,7 @@ import { BattlePopup } from "@/components/battlePopup"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { LeftSidebar } from "@/components/LeftSidebar"
 import LoginPage from '@/components/login'
+import Head from 'next/head'
 
 export default function Index() {
   const [username, setUsername] = useState(null)
@@ -25,7 +26,14 @@ export default function Index() {
   }
 
   if (!username) {
-    return <LoginPage onLogin={handleLogin} />
+    return (
+      <>
+        <Head>
+          <title>Login | CodeBattles</title>
+        </Head>
+        <LoginPage onLogin={handleLogin} />
+      </>
+    )
   }
 
 
@@ -57,8 +65,12 @@ export default function Index() {
   ]
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <LeftSidebar username={username} rating={rating} />
+    <>
+      <Head>
+        <title>Home | CodeBattles</title>
+      </Head>
+      <div className="flex h-screen bg-background text-foreground overflow-hidden">
+        <LeftSidebar username={username} rating={rating} />
       {/* Main Content */}
       <div className="flex-1 p-6">
         <header className="mb-6">
@@ -222,6 +234,7 @@ export default function Index() {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
