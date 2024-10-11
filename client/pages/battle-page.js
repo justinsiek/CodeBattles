@@ -19,7 +19,7 @@ export default function BattlePage() {
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
   const [error, setError] = useState(null)
-  const problem = 1
+  const problem = 2
   const [title, setTitle] = useState(null)
   const [difficulty, setDifficulty] = useState(null)
   const [description, setDescription] = useState([])
