@@ -1,159 +1,73 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import psycopg2
+from flask_sqlalchemy import SQLAlchemy
 import json
 import os
-from dotenv import load_dotenv
 import requests
-
-load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://172.20.10.2:3000"]}})
 
-DB_NAME = 'postgres'
-DB_USER = 'write_user'
-DB_PASSWORD = 'password'
-DB_HOST = 'localhost'
-DB_PORT = '5432'
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://write_user:password@localhost:5432/postgres"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+class Problem(db.Model):
+    __tablename__ = 'problems'
+    __table_args__ = {'schema': 'codebattles'}
+
+    problem_id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    difficulty = db.Column(db.String)
+    description = db.Column(db.JSON)
+    examples = db.Column(db.JSON)
+    starter_code = db.Column(db.Text)
+    test_cases = db.Column(db.Text)
 
 @app.route('/api/retrieveproblem', methods=['GET'])
 def retrieve_problem():
     problem_id = request.args.get('problem', default=1, type=int)
+    problem = Problem.query.get(problem_id)
 
-    try:
-        conn = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM codebattles.problems WHERE problem_id = %s", (problem_id,))
-        result = cursor.fetchone()
-
-        cursor.close()
-        conn.close()
-    except psycopg2.Error as e:
-        print(f"Database error: {e}")
-        return jsonify({'error': f'Database error: {e}'})
-        
-    if result:
-        problem_id, title, difficulty, description, examples, starter_code, test_cases = result
-        
-        problem = {
-            'problem_id': problem_id,
-            'title': title,
-            'difficulty': difficulty,
-            'description': description,  
-            'examples': examples,  
-            'starter_code': starter_code,
-            'test_cases': test_cases
+    if problem:
+        problem_data = {
+            'problem_id': problem.problem_id,
+            'title': problem.title,
+            'difficulty': problem.difficulty,
+            'description': problem.description,
+            'examples': problem.examples,
+            'starter_code': problem.starter_code,
+            'test_cases': problem.test_cases
         }
-
-    return jsonify(problem)
-'''
-@app.route('/api/retrieveproblem', methods=['GET'])
-def retrieve_problem():
-    #problem_id = request.args.get('problem', default=1, type=int)
-    problem = {}
-    problem['title'] = "Top K Frequent Elements"
-    problem['difficulty'] = "Medium"
-    problem['description'] = [
-        "Given an integer array nums and an integer k, return the k most frequent elements.",
-        "It is guaranteed that the answer is unique.",
-        "You can return the answer in any order.",
-    ]
-    problem['examples'] = [["Input: nums = [1,1,1,2,2,3], k = 2", "Output: [1,2]"],
-                            ["Input: nums = [1], k = 1", "Output: [1]"]]
-    problem['starter_code'] = """def topKFrequent(nums, k): 
-    pass"""
-    return jsonify(problem)
-'''
+        return jsonify(problem_data)
+    else:
+        return jsonify({'error': 'Problem not found'}), 404
 
 @app.route('/api/testcode', methods=['GET'])
 def test_code():
     user_code = request.args.get('user_code', default='pass', type=str)
     problem_id = request.args.get('problem_id', default=1, type=int)
     url = "https://judge0-ce.p.rapidapi.com"
-    #url = "https://judge029.p.rapidapi.com"
 
     rapidapi_key = os.getenv('RAPIDAPI_KEY')
-    #rapidapi_key = os.getenv('OTHER_RAPIDAPI_KEY')
+    if not rapidapi_key:
+        return jsonify({'error': 'RAPIDAPI_KEY not set in environment variables'}), 500
 
     headers = {
         "X-RapidAPI-Key": rapidapi_key,
         "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-        #"X-RapidAPI-Host": "judge029.p.rapidapi.com",
         "Content-Type": "application/json"
     }
 
-    results = {"passed_tests": 0, "all_passed": False, "error" : None}
+    results = {"passed_tests": 0, "all_passed": False, "error": None}
     
-    try:
-        conn = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-        cursor = conn.cursor()
+    problem = Problem.query.get(problem_id)
+    if not problem:
+        results['error'] = 'Problem not found'
+        return jsonify(results), 404
 
-        cursor.execute("SELECT test_cases FROM codebattles.problems WHERE problem_id = %s", (problem_id,))
-        test_cases = cursor.fetchone()[0]
-
-        cursor.close()
-        conn.close()
-    except psycopg2.Error as e:
-        results['error'] = f'Database error: {e}'
-        return jsonify(results)
-    '''
-
-    
-    test_cases = """def run_tests():
-    test_cases = [
-        ([1,1,1,2,2,3], 2, [1,2]),
-        ([1], 1, [1]),
-        ([1,2,2,3,3,3], 2, [3,2]),
-        ([4,1,-1,2,-1,2,3], 2, [-1,2]),
-        ([1,1,1,2,2,3,3,3], 3, [1,2,3]),
-        ([5,3,1,1,1,3,73,1], 2, [1,3]),
-        ([3,0,1,0], 1, [0]),
-        ([1,2], 2, [1,2]),
-        ([1, 2, 3, 4, 5], 5, [1,2,3,4,5]),
-        ([1, 2, 3, 4, 5], 0, []),
-        ([1, 1, 1, 2, 2, 2, 3, 3, 3, 4], 3, [1,2,3])
-    ]
-    
-    results = []
-    for i, (nums, k, expected_output) in enumerate(test_cases, 1):
-        actual_output = topKFrequent(nums, k)
-        if actual_output is None:
-            passed = False
-            actual_set = None
-        else:   
-            # Convert to sets for unordered comparison
-            actual_set = set(actual_output)
-            expected_set = set(expected_output)
-            passed = actual_set == expected_set and len(actual_output) == len(expected_output)
-        results.append({
-            "test_case": i,
-            "input": {"nums": nums, "k": k},
-            "expected": expected_output,
-            "actual": actual_output,
-            "passed": passed
-        })
-    
-    return results
-
-print(json.dumps({"test_results": run_tests()}))
-"""
-'''
-    
-
+    test_cases = problem.test_cases
 
     full_code = f"""
 import json
@@ -210,23 +124,21 @@ import json
             results['passed_tests'] = passed_tests
             results['all_passed'] = passed_tests == total_tests
             return jsonify(results)  
-        else: #this is where the main error handling is
+        else:
             print(f"Error: No stdout received. Full status: {status}")
-            return jsonify({'error': stderr or 'No output received from the API'})
+            return jsonify({'error': stderr or 'No output received from the API'}), 500
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
         if http_err.response.status_code == 429:
             results['error'] = 'API rate limit exceeded. Please try again later.'
-            return jsonify(results)
-        return jsonify({'error': f'HTTP error: {http_err}'})
+            return jsonify(results), 429
+        return jsonify({'error': f'HTTP error: {http_err}'}), 500
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
-        return jsonify({'error': f'Request error: {req_err}'})
+        return jsonify({'error': f'Request error: {req_err}'}), 500
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return jsonify({'error': f'Unexpected error: {str(e)}'})
-
-    
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)

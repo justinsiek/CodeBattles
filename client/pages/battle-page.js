@@ -19,7 +19,7 @@ export default function BattlePage() {
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
   const [error, setError] = useState(null)
-  const problem = 3
+  const problem = 1
   const [title, setTitle] = useState(null)
   const [difficulty, setDifficulty] = useState(null)
   const [description, setDescription] = useState([])
@@ -97,7 +97,7 @@ export default function BattlePage() {
   return (
     <>
       <Head>
-        <title>{title} | CodeBattles</title>
+        <title>{title ? `${title} | CodeBattles` : 'CodeBattles'}</title>
       </Head>
       <div className="h-screen p-4 flex flex-col">
         <div className="flex gap-4 flex-grow">
