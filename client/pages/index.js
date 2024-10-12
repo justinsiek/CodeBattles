@@ -49,6 +49,10 @@ export default function Index() {
       setConnectedUsers(validUsers)
     })
 
+    newSocket.on('invite_received', (data) => {
+      alert(`${data.sender} has invited you to a battle!`)
+    })
+
     return () => {
       newSocket.disconnect()
     }
@@ -71,7 +75,6 @@ export default function Index() {
       </>
     )
   }
-
 
   
   const recentMatches = [
@@ -132,7 +135,7 @@ export default function Index() {
                   <DialogHeader>
                     <DialogTitle>Battle Options</DialogTitle>
                   </DialogHeader>
-                  <BattlePopup />
+                  <BattlePopup socket={socket} />
                 </DialogContent>
               </Dialog>
             </CardContent>

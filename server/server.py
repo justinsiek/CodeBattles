@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 import os
 import requests
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://172.20.10.2:3000"]}})
@@ -147,7 +147,7 @@ import json
 @socketio.on('connect')
 def handle_connect():
     user_id = request.sid  
-    connected_users[user_id] = {'username': None}  
+    connected_users[user_id] = {'username': None, 'sid': user_id}  
     print(f"Client connected: {user_id}")
     emit('connection_response', {'status': 'connected', 'user_id': user_id})
 
@@ -155,9 +155,10 @@ def handle_connect():
 def handle_disconnect():
     user_id = request.sid
     if user_id in connected_users:
+        username = connected_users[user_id]['username']
         del connected_users[user_id]
-        print(f"Client disconnected: {user_id}")
-    emit('update_connected_users', list(connected_users.values()), broadcast=True)
+        print(f"Client disconnected: {user_id} (Username: {username})")
+    emit('update_connected_users', [user for user in connected_users.values() if user['username']], broadcast=True)
 
 @socketio.on('set_username')
 def handle_set_username(data):
@@ -172,6 +173,24 @@ def handle_set_username(data):
     print(connected_users)
     emit('update_connected_users', list(connected_users.values()), broadcast=True)
 
+@socketio.on('sendInvite')
+def handle_send_invite(data):
+    target_username = data['username']
+    sender_sid = request.sid
+    sender_username = connected_users[sender_sid]['username']
+    
+    target_user = next((user for user in connected_users.values() if user['username'] == target_username), None)
+    
+    if target_user:
+        emit('invite_received', {
+            'sender': sender_username,
+            'isRated': data.get('isRated', False)
+        }, room=target_user['sid'])
+        emit('invite_sent', {'status': 'success', 'message': f"Invite sent to {target_username}"}, room=sender_sid)
+        print(f"Invite sent from {sender_username} to {target_username}")
+    else:
+        emit('invite_sent', {'status': 'error', 'message': f"User {target_username} not found or offline"}, room=sender_sid)
+        print(f"Failed to send invite: User {target_username} not found")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8080)
