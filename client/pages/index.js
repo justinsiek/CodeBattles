@@ -7,22 +7,58 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Swords } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { BattlePopup } from "@/components/battlePopup"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { LeftSidebar } from "@/components/LeftSidebar"
 import LoginPage from '@/components/login'
 import Head from 'next/head'
+import { io } from 'socket.io-client'
 
 export default function Index() {
   const [username, setUsername] = useState(null)
   const [rating, setRating] = useState(1850)
   const [currentRank, setCurrentRank] = useState("Elite")
   const [nextRank, setNextRank] = useState("Expert")
+  const [socket, setSocket] = useState(null)
+  const [connectedUsers, setConnectedUsers] = useState([])
+  
+  useEffect(() => {
+    const newSocket = io('http://localhost:8080')
+    setSocket(newSocket)
+
+    newSocket.on('connect', () => {
+      console.log('Connected to server')
+    })
+
+    newSocket.on('connection_response', (data) => {
+      console.log('Connection response:', data)
+    })
+
+    newSocket.on('username_set', (data) => {
+      if (data.status === 'success') {
+        console.log('Username set successfully:', data.username)
+      } else {
+        console.error('Failed to set username:', data.message)
+      }
+    })
+
+    newSocket.on('update_connected_users', (data) => {
+      const validUsers = data.filter(user => user.username && user.username.trim() !== '')
+      setConnectedUsers(validUsers)
+    })
+
+    return () => {
+      newSocket.disconnect()
+    }
+  }, [])
 
   const handleLogin = (username) => {
     setUsername(username)
+    if (socket) {
+      socket.emit('set_username', { username })
+    }
   }
 
   if (!username) {
@@ -193,42 +229,16 @@ export default function Index() {
       </div>
       {/* Right Sidebar */}
       <div className="w-64 border-l p-4">
-        <h3 className="font-semibold mb-4">Top Performers</h3>
-        <div className="space-y-4">
-          {[
-            { name: "tourist", rating: 2200, badge: "Grandmaster" },
-            { name: "bgates", rating: 2180, badge: "Master" },
-            { name: "blank", rating: 2150, badge: "Expert" },
-          ].map((user, index) => (
+        <h3 className="font-semibold mb-4">Connected Users</h3>
+        <div className="space-y-4" key={connectedUsers}>
+          {connectedUsers.map((user, index) => (
             <div key={index} className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
+                <AvatarFallback>{user.username[0]}</AvatarFallback>
               </Avatar>
               <div>
-                <div className="font-medium">{user.name}</div>
-                <div className="text-sm text-muted-foreground">{user.rating}</div>
-              </div>
-              <Badge variant="secondary" className="ml-auto">
-                {user.badge}
-              </Badge>
-            </div>
-          ))}
-        </div>
-        <Separator className="my-4" />
-        <h3 className="font-semibold mb-4">Friends</h3>
-        <div className="space-y-4">
-          {[
-            { name: "pandyrew", status: "Online" },
-            { name: "scarface", status: "In Battle" },
-            { name: "mitsu", status: "Offline" },
-          ].map((opponent, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>{opponent.name[0]}</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">{opponent.name}</div>
-                <div className="text-xs text-muted-foreground">{opponent.status}</div>
+                <div className="font-medium">{user.username}</div>
+                <div className="text-sm text-muted-foreground">1800</div>
               </div>
             </div>
           ))}

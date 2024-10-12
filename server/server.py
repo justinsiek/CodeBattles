@@ -4,15 +4,18 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 import os
 import requests
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://172.20.10.2:3000"]}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://write_user:password@localhost:5432/postgres"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'secret_key'
 
 db = SQLAlchemy(app)
+
+connected_users = {}
 
 class Problem(db.Model):
     __tablename__ = 'problems'
@@ -140,6 +143,35 @@ import json
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
+
+@socketio.on('connect')
+def handle_connect():
+    user_id = request.sid  
+    connected_users[user_id] = {'username': None}  
+    print(f"Client connected: {user_id}")
+    emit('connection_response', {'status': 'connected', 'user_id': user_id})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    user_id = request.sid
+    if user_id in connected_users:
+        del connected_users[user_id]
+        print(f"Client disconnected: {user_id}")
+    emit('update_connected_users', list(connected_users.values()), broadcast=True)
+
+@socketio.on('set_username')
+def handle_set_username(data):
+    user_id = request.sid
+    username = data['username']
+    if user_id in connected_users:
+        connected_users[user_id]['username'] = username
+        print(f"Username set for {user_id}: {username}")
+        emit('username_set', {'status': 'success', 'username': username})
+    else:
+        emit('username_set', {'status': 'error', 'message': 'User not found'})
+    print(connected_users)
+    emit('update_connected_users', list(connected_users.values()), broadcast=True)
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8080)
