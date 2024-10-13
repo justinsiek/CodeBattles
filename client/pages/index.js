@@ -15,6 +15,7 @@ import { LeftSidebar } from "@/components/LeftSidebar"
 import LoginPage from '@/components/login'
 import Head from 'next/head'
 import { io } from 'socket.io-client'
+import { InviteAlert } from '@/components/InviteAlert'
 
 export default function Index() {
   const [username, setUsername] = useState(null)
@@ -23,7 +24,8 @@ export default function Index() {
   const [nextRank, setNextRank] = useState("Expert")
   const [socket, setSocket] = useState(null)
   const [connectedUsers, setConnectedUsers] = useState([])
-  
+  const [pendingInvite, setPendingInvite] = useState(null)
+
   useEffect(() => {
     const newSocket = io('http://localhost:8080')
     setSocket(newSocket)
@@ -50,7 +52,19 @@ export default function Index() {
     })
 
     newSocket.on('invite_received', (data) => {
-      alert(`${data.sender} has invited you to a battle!`)
+      setPendingInvite(data)
+    })
+
+    newSocket.on('invite_sent', (data) => {
+      if (data.status === 'success') {
+        alert(data.message)
+      } else {
+        alert(data.message)
+      }
+    })
+
+    newSocket.on('battleStarting', (data) => {
+      console.log('Battle starting:', data)
     })
 
     return () => {
@@ -63,6 +77,20 @@ export default function Index() {
     if (socket) {
       socket.emit('set_username', { username })
     }
+  }
+
+  const handleAcceptInvite = () => {
+    // TODO: Implement accept logic
+    if (socket && pendingInvite) {
+      socket.emit('accept_invite', { inviterId: pendingInvite.sender_sid, inviteeId: socket.id })
+    }
+    setPendingInvite(null)
+  }
+
+  const handleDeclineInvite = () => {
+    // TODO: Implement decline logic
+    console.log("Invite declined")
+    setPendingInvite(null)
   }
 
   if (!username) {
@@ -248,6 +276,13 @@ export default function Index() {
         </div>
       </div>
       </div>
+      {pendingInvite && (
+        <InviteAlert
+          invite={pendingInvite}
+          onAccept={handleAcceptInvite}
+          onDecline={handleDeclineInvite}
+        />
+      )}
     </>
   )
 }

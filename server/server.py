@@ -184,6 +184,7 @@ def handle_send_invite(data):
     if target_user:
         emit('invite_received', {
             'sender': sender_username,
+            'sender_sid': sender_sid,
             'isRated': data.get('isRated', False)
         }, room=target_user['sid'])
         emit('invite_sent', {'status': 'success', 'message': f"Invite sent to {target_username}"}, room=sender_sid)
@@ -191,6 +192,12 @@ def handle_send_invite(data):
     else:
         emit('invite_sent', {'status': 'error', 'message': f"User {target_username} not found or offline"}, room=sender_sid)
         print(f"Failed to send invite: User {target_username} not found")
+
+@socketio.on('accept_invite')
+def handle_accept_invite(data):
+    battle_room_id = 123 #need to generate a random id eventually
+    emit('battleStarting', {'battleRoomId': battle_room_id}, room=data['inviterId'])
+    emit('battleStarting', {'battleRoomId': battle_room_id}, room=data['inviteeId'])
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8080)
