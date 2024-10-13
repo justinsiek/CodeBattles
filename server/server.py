@@ -1,3 +1,5 @@
+import random
+import string
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -5,6 +7,7 @@ import json
 import os
 import requests
 from flask_socketio import SocketIO, emit, join_room
+import time
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://172.20.10.2:3000"]}})
@@ -195,9 +198,10 @@ def handle_send_invite(data):
 
 @socketio.on('accept_invite')
 def handle_accept_invite(data):
-    battle_room_id = 123 #need to generate a random id eventually
+    battle_room_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
     emit('battleStarting', {'battleRoomId': battle_room_id}, room=data['inviterId'])
     emit('battleStarting', {'battleRoomId': battle_room_id}, room=data['inviteeId'])
+    print(f"Battle room {battle_room_id} created for {data['inviterId']} and {data['inviteeId']}")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8080)
