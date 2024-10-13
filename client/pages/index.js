@@ -16,6 +16,7 @@ import LoginPage from '@/components/login'
 import Head from 'next/head'
 import { io } from 'socket.io-client'
 import { InviteAlert } from '@/components/InviteAlert'
+import { useRouter } from 'next/router'
 
 export default function Index() {
   const [username, setUsername] = useState(null)
@@ -25,6 +26,7 @@ export default function Index() {
   const [socket, setSocket] = useState(null)
   const [connectedUsers, setConnectedUsers] = useState([])
   const [pendingInvite, setPendingInvite] = useState(null)
+  const router = useRouter()
 
   useEffect(() => {
     const newSocket = io('http://localhost:8080')
@@ -64,7 +66,7 @@ export default function Index() {
     })
 
     newSocket.on('battleStarting', (data) => {
-      console.log('Battle starting:', data)
+      router.push(`/battle/${data.battleRoomId}`)
     })
 
     return () => {
