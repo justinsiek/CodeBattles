@@ -212,27 +212,38 @@ def handle_accept_invite(data):
     battle_state = {
         'room_id': battle_room_id,
         'players': {
-            inviter_id: {'submissions_left': 3, 'passed_tests': 0},
-            invitee_id: {'submissions_left': 3, 'passed_tests': 0}
+            inviter_id: {'username': connected_users[inviter_id]['username'], 'submissions_left': 3, 'passed_tests': 0},
+            invitee_id: {'username': connected_users[invitee_id]['username'], 'submissions_left': 3, 'passed_tests': 0}
         },
         'problem_id': 2,  
         'start_time': time.time(),
         'duration': 300  
-    }
 
+    }
 
     active_battles[battle_room_id] = battle_state
 
-    battle_info = {
-        'battleRoomId': battle_room_id,
-        'opponentId': invitee_id if inviter_id == request.sid else inviter_id,
-        'problemId': battle_state['problem_id'],
-        'duration': battle_state['duration']
-    }
-    emit('battleStarting', battle_info, room=inviter_id)
-    emit('battleStarting', battle_info, room=invitee_id)
+    emit('battleStarting', {'battleRoomId': battle_state['room_id']}, room=inviter_id)
+    emit('battleStarting', {'battleRoomId': battle_state['room_id']}, room=invitee_id)
 
     print(f"Battle room {battle_room_id} created for {inviter_id} and {invitee_id}")
+
+@socketio.on('retrieve_opponent_info')
+def handle_retrieve_opponent_info(data):
+    battle_room_id = data['battleRoomId']
+    
+    if battle_room_id in active_battles:
+        battle_info = active_battles[battle_room_id]
+        player_ids = list(battle_info['players'].keys())
+        inviter_id, invitee_id = player_ids[0], player_ids[1]
+        
+        opponent_id = invitee_id if inviter_id == request.sid else inviter_id
+        opponent_username = battle_info['players'][opponent_id]['username']
+    
+        emit('opponent_info_received', {'opponent_username': opponent_username}, room=request.sid)
+    else:
+        print(f"Battle room {battle_room_id} not found")
+        emit('error', {'message': 'Battle room not found'}, room=request.sid)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8080)

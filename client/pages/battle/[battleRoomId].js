@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -27,9 +28,20 @@ export default function BattlePage() {
   const [examples, setExamples] = useState([])
   const [starterCode, setStarterCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [opponentUsername, setOpponentUsername] = useState(null)
   const socket = getSocket()
+  const router = useRouter()
+  const { battleRoomId } = router.query
 
   useEffect(() => {
+    
+    socket.on('opponent_info_received', (data) => {
+      console.log('username', data)
+      setOpponentUsername(data.opponent_username)
+    })
+
+    socket.emit('retrieve_opponent_info', {battleRoomId: battleRoomId})
+
     fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
       .then(response => response.json())
       .then(data => {
@@ -135,7 +147,7 @@ export default function BattlePage() {
                 <User className="h-10 w-10 text-primary" />
                 <div className="flex-grow">
                   <div className="flex justify-between items-center">
-                    <p className="font-semibold">wasd</p>
+                    <p className="font-semibold">{opponentUsername}</p>
                   </div>
                   <p className="text-sm text-muted-foreground">Rating: 1900</p>
                 </div>

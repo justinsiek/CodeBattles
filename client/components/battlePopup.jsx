@@ -29,10 +29,6 @@ export function BattlePopup({ socket }) {
     }
   }, [socket])
 
-
-
-
-
   return (
     <div className="w-full">
       <Tabs defaultValue="random" className="w-full space-y-4">
