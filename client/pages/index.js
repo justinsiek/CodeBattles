@@ -14,66 +14,81 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { LeftSidebar } from "@/components/LeftSidebar"
 import LoginPage from '@/components/login'
 import Head from 'next/head'
-import { io } from 'socket.io-client'
 import { InviteAlert } from '@/components/InviteAlert'
 import { useRouter } from 'next/router'
+import { getSocket } from "@/utils/socketManager"
 
 export default function Index() {
   const [username, setUsername] = useState(null)
   const [rating, setRating] = useState(1850)
   const [currentRank, setCurrentRank] = useState("Elite")
   const [nextRank, setNextRank] = useState("Expert")
-  const [socket, setSocket] = useState(null)
   const [connectedUsers, setConnectedUsers] = useState([])
   const [pendingInvite, setPendingInvite] = useState(null)
   const router = useRouter()
+  const socket = getSocket()
 
   useEffect(() => {
-    const newSocket = io('http://localhost:8080')
-    setSocket(newSocket)
-
-    newSocket.on('connect', () => {
+    // Event Listeners
+    const handleConnect = () => {
       console.log('Connected to server')
-    })
+    }
 
-    newSocket.on('connection_response', (data) => {
+    const handleConnectionResponse = (data) => {
       console.log('Connection response:', data)
-    })
+    }
 
-    newSocket.on('username_set', (data) => {
+    const handleUsernameSet = (data) => {
       if (data.status === 'success') {
         console.log('Username set successfully:', data.username)
       } else {
         console.error('Failed to set username:', data.message)
       }
-    })
+    }
 
-    newSocket.on('update_connected_users', (data) => {
+    const handleUpdateConnectedUsers = (data) => {
       const validUsers = data.filter(user => user.username && user.username.trim() !== '')
       setConnectedUsers(validUsers)
-    })
+    }
 
-    newSocket.on('invite_received', (data) => {
+    const handleInviteReceived = (data) => {
       setPendingInvite(data)
-    })
+    }
 
-    newSocket.on('invite_sent', (data) => {
+    const handleInviteSent = (data) => {
       if (data.status === 'success') {
         alert(data.message)
       } else {
         alert(data.message)
       }
-    })
+    }
 
-    newSocket.on('battleStarting', (data) => {
+    const handleBattleStarting = (data) => {
       console.log(data)
       router.push(`/battle/${data.battleRoomId}`)
-    })
-
-    return () => {
-      newSocket.disconnect()
     }
-  }, [])
+
+    // Attach Event Listeners
+    socket.on('connect', handleConnect)
+    socket.on('connection_response', handleConnectionResponse)
+    socket.on('username_set', handleUsernameSet)
+    socket.on('update_connected_users', handleUpdateConnectedUsers)
+    socket.on('invite_received', handleInviteReceived)
+    socket.on('invite_sent', handleInviteSent)
+    socket.on('battleStarting', handleBattleStarting)
+
+    // Cleanup Event Listeners
+    return () => {
+      socket.off('connect', handleConnect)
+      socket.off('connection_response', handleConnectionResponse)
+      socket.off('username_set', handleUsernameSet)
+      socket.off('update_connected_users', handleUpdateConnectedUsers)
+      socket.off('invite_received', handleInviteReceived)
+      socket.off('invite_sent', handleInviteSent)
+      socket.off('battleStarting', handleBattleStarting)
+      // **Do not disconnect the global socket here**
+    }
+  }, [router, socket])
 
   const handleLogin = (username) => {
     setUsername(username)

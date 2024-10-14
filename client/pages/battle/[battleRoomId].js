@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react" 
 import Head from 'next/head'
+import { getSocket } from "@/utils/socketManager"
 
 export default function BattlePage() {
   const [timeLeft, setTimeLeft] = useState(300) 
@@ -26,6 +27,7 @@ export default function BattlePage() {
   const [examples, setExamples] = useState([])
   const [starterCode, setStarterCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const socket = getSocket()
 
   useEffect(() => {
     fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
