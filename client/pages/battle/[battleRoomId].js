@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -37,6 +37,9 @@ export default function BattlePage() {
   const router = useRouter()
   const { battleRoomId } = router.query
 
+  const startTimeRef = useRef(null)
+  const durationRef = useRef(300) // Default duration in seconds
+
   useEffect(() => {
     fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
       .then(response => response.json())
@@ -51,9 +54,14 @@ export default function BattlePage() {
   }, [])
 
   useEffect(() => {
-    socket.on('opponent_info_received', (data) => {
+    socket.on('match_info_received', (data) => {
       console.log('username', data)
       setOpponentUsername(data.opponent_username)
+      
+      // Set start time and duration
+      startTimeRef.current = data.start_time
+      durationRef.current = data.duration
+      calculateTimeLeft(data.start_time, data.duration)
     })
 
     socket.on('update_opponent_progress', (data) => {
@@ -63,23 +71,33 @@ export default function BattlePage() {
     })
 
     return () => {
-      socket.off('opponent_info_received')
+      socket.off('match_info_received')
       socket.off('update_opponent_progress')
     }
   }, [socket])
 
   useEffect(() => {
     if (battleRoomId) {
-      socket.emit('retrieve_opponent_info', { battleRoomId })
+      socket.emit('retrieve_match_info', { battleRoomId })
     }
   }, [battleRoomId, socket])
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timer)
+    if (startTimeRef.current && durationRef.current) {
+      const timer = setInterval(() => {
+        calculateTimeLeft(startTimeRef.current, durationRef.current)
+      }, 1000)
+
+      return () => clearInterval(timer)
     }
-  }, [timeLeft])
+  }, [startTimeRef.current, durationRef.current])
+
+  const calculateTimeLeft = (startTime, duration) => {
+    const currentTime = Date.now() / 1000  // Current time in seconds
+    const elapsed = currentTime - startTime
+    const remaining = duration - elapsed
+    setTimeLeft(Math.max(0, Math.ceil(remaining)))
+  }
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60)

@@ -242,8 +242,8 @@ def handle_accept_invite(data):
 
     print(f"Battle room {battle_room_id} created for {inviter_id} and {invitee_id}")
 
-@socketio.on('retrieve_opponent_info')
-def handle_retrieve_opponent_info(data):
+@socketio.on('retrieve_match_info')
+def handle_retrieve_match_info(data):
     battle_room_id = data['battleRoomId']
     
     if battle_room_id in active_battles:
@@ -253,8 +253,15 @@ def handle_retrieve_opponent_info(data):
         
         opponent_id = invitee_id if inviter_id == request.sid else inviter_id
         opponent_username = battle_info['players'][opponent_id]['username']
+
+        start_time = battle_info['start_time']
+        duration = battle_info['duration']
     
-        emit('opponent_info_received', {'opponent_username': opponent_username}, room=request.sid)
+        emit('match_info_received', 
+            {'opponent_username': opponent_username, 
+             'start_time': start_time, 
+             'duration': duration}, 
+             room=request.sid)
     else:
         print(f"Battle room {battle_room_id} not found")
         emit('error', {'message': 'Battle room not found'}, room=request.sid)
