@@ -21,7 +21,7 @@ export default function BattlePage() {
   const [allPassed, setAllPassed] = useState(false)
   const [passedTests, setPassedTests] = useState(0)
   const [error, setError] = useState(null)
-  const problem = 2
+  const problem = 1
   const [title, setTitle] = useState(null)
   const [difficulty, setDifficulty] = useState(null)
   const [description, setDescription] = useState([])
@@ -29,19 +29,15 @@ export default function BattlePage() {
   const [starterCode, setStarterCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [opponentUsername, setOpponentUsername] = useState(null)
+  const [opponentRating, setOpponentRating] = useState(1800)
+  const [opponentSubmissionsLeft, setOpponentSubmissionsLeft] = useState(3)
+  const [opponentPassedTests, setOpponentPassedTests] = useState(0)
+  const [opponentAllPassed, setOpponentAllPassed] = useState(false)
   const socket = getSocket()
   const router = useRouter()
   const { battleRoomId } = router.query
 
   useEffect(() => {
-    
-    socket.on('opponent_info_received', (data) => {
-      console.log('username', data)
-      setOpponentUsername(data.opponent_username)
-    })
-
-    socket.emit('retrieve_opponent_info', {battleRoomId: battleRoomId})
-
     fetch('http://localhost:8080/api/retrieveproblem?problem=' + problem)
       .then(response => response.json())
       .then(data => {
@@ -53,6 +49,23 @@ export default function BattlePage() {
         setStarterCode(data.starter_code)
       })
   }, [])
+
+  useEffect(() => {
+    socket.on('opponent_info_received', (data) => {
+      console.log('username', data)
+      setOpponentUsername(data.opponent_username)
+    })
+
+    return () => {
+      socket.off('opponent_info_received')
+    }
+  }, [socket])
+
+  useEffect(() => {
+    if (battleRoomId) {
+      socket.emit('retrieve_opponent_info', { battleRoomId })
+    }
+  }, [battleRoomId, socket])
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -149,17 +162,17 @@ export default function BattlePage() {
                   <div className="flex justify-between items-center">
                     <p className="font-semibold">{opponentUsername}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Rating: 1900</p>
+                  <p className="text-sm text-muted-foreground">Rating: {opponentRating}</p>
                 </div>
                 <div className="absolute top-0 right-0">
-                  <Badge variant="secondary">2 submissions left</Badge>
+                  <Badge variant="secondary">{opponentSubmissionsLeft} submissions left</Badge>
                 </div>
               </div>
               <div className="flex justify-between items-center mt-6">
                 <span className="text-md font-medium">Test cases passed:</span>
-                <span className="text-md font-medium">6/11</span>
+                <span className="text-md font-medium">{opponentPassedTests}/11</span>
               </div>
-              <Progress value={6/11*100} max={11} className="w-full h-2 mt-2" />
+              <Progress value={opponentPassedTests/11*100} max={11} className="w-full h-2 mt-2" />
             </CardContent>
           </Card>
         </div>
