@@ -59,6 +59,10 @@ def retrieve_problem():
 def test_code():
     user_code = request.args.get('user_code', default='pass', type=str)
     problem_id = request.args.get('problem_id', default=1, type=int)
+    battle_room_id = request.args.get('battle_room_id', default=None, type=str)
+    opponent_username = request.args.get('opponent_username', default=None, type=str)
+    user_sid = request.args.get('user_sid', default=None, type=str)
+
     url = "https://judge0-ce.p.rapidapi.com"
 
     rapidapi_key = os.getenv('RAPIDAPI_KEY')
@@ -128,12 +132,22 @@ import json
         if stdout:
             output_json = json.loads(stdout)
             test_results = output_json.get("test_results", [])
-            print(test_results)
             passed_tests = sum(result['passed'] for result in test_results)
             total_tests = len(test_results)
             
             results['passed_tests'] = passed_tests
             results['all_passed'] = passed_tests == total_tests
+
+            if battle_room_id and battle_room_id in active_battles:
+                opponent_sid = next((sid for sid, player in active_battles[battle_room_id]['players'].items() if player['username'] == opponent_username), None)
+                if user_sid and user_sid in active_battles[battle_room_id]['players']:
+                    active_battles[battle_room_id]['players'][user_sid]['submissions_left'] -= 1
+                    submissions_left = active_battles[battle_room_id]['players'][user_sid]['submissions_left']
+                    socketio.emit('update_opponent_progress', {
+                        "opponent_passed_tests": passed_tests, 
+                        "opponent_submissions_left": submissions_left
+                    }, room=opponent_sid)
+                    print(f"Updated opponent progress for {opponent_username}: {passed_tests} tests passed, {submissions_left} submissions left")
             return jsonify(results)  
         else:
             print(f"Error: No stdout received. Full status: {status}")

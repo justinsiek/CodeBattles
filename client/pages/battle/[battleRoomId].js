@@ -56,8 +56,15 @@ export default function BattlePage() {
       setOpponentUsername(data.opponent_username)
     })
 
+    socket.on('update_opponent_progress', (data) => {
+      console.log('update_opponent_progress', data)
+      setOpponentPassedTests(data.opponent_passed_tests)
+      setOpponentSubmissionsLeft(data.opponent_submissions_left)
+    })
+
     return () => {
       socket.off('opponent_info_received')
+      socket.off('update_opponent_progress')
     }
   }, [socket])
 
@@ -88,7 +95,11 @@ export default function BattlePage() {
       setError(null)
       setIsLoading(true)
       const encodedCode = encodeURIComponent(code)
-      fetch('http://localhost:8080/api/testcode?user_code=' + encodedCode + '&problem_id=' + problem)
+      fetch('http://localhost:8080/api/testcode?user_code=' + encodedCode 
+        + '&problem_id=' + problem
+        + '&battle_room_id=' + battleRoomId
+        + '&opponent_username=' + opponentUsername
+        + '&user_sid=' + socket.id)
         .then(response => response.json())
         .then(data => {
           setIsLoading(false)
