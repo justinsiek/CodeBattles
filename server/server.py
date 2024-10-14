@@ -19,6 +19,7 @@ app.config['SECRET_KEY'] = 'secret_key'
 db = SQLAlchemy(app)
 
 connected_users = {}
+active_battles = {}
 
 class Problem(db.Model):
     __tablename__ = 'problems'
@@ -199,9 +200,36 @@ def handle_send_invite(data):
 @socketio.on('accept_invite')
 def handle_accept_invite(data):
     battle_room_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-    emit('battleStarting', {'battleRoomId': battle_room_id}, room=data['inviterId'])
-    emit('battleStarting', {'battleRoomId': battle_room_id}, room=data['inviteeId'])
-    print(f"Battle room {battle_room_id} created for {data['inviterId']} and {data['inviteeId']}")
+    inviter_id = data['inviterId']
+    invitee_id = data['inviteeId']
+
+    join_room(battle_room_id, sid=inviter_id)
+    join_room(battle_room_id, sid=invitee_id)
+
+    battle_state = {
+        'room_id': battle_room_id,
+        'players': {
+            inviter_id: {'submissions_left': 3, 'passed_tests': 0},
+            invitee_id: {'submissions_left': 3, 'passed_tests': 0}
+        },
+        'problem_id': 2,  
+        'start_time': time.time(),
+        'duration': 300  
+    }
+
+
+    active_battles[battle_room_id] = battle_state
+
+    battle_info = {
+        'battleRoomId': battle_room_id,
+        'opponentId': invitee_id if inviter_id == request.sid else inviter_id,
+        'problemId': battle_state['problem_id'],
+        'duration': battle_state['duration']
+    }
+    emit('battleStarting', battle_info, room=inviter_id)
+    emit('battleStarting', battle_info, room=invitee_id)
+
+    print(f"Battle room {battle_room_id} created for {inviter_id} and {invitee_id}")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=8080)

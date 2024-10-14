@@ -66,6 +66,7 @@ export default function Index() {
     })
 
     newSocket.on('battleStarting', (data) => {
+      console.log(data)
       router.push(`/battle/${data.battleRoomId}`)
     })
 
@@ -82,7 +83,6 @@ export default function Index() {
   }
 
   const handleAcceptInvite = () => {
-    // TODO: Implement accept logic
     if (socket && pendingInvite) {
       socket.emit('accept_invite', { inviterId: pendingInvite.sender_sid, inviteeId: socket.id })
     }
@@ -90,7 +90,7 @@ export default function Index() {
   }
 
   const handleDeclineInvite = () => {
-    // TODO: Implement decline logic
+    // implement decline logic
     console.log("Invite declined")
     setPendingInvite(null)
   }
