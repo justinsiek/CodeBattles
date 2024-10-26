@@ -13,6 +13,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react" 
 import Head from 'next/head'
 import { getSocket } from "@/utils/socketManager"
+import BattleSummary from '@/components/ui/BattleSummary'
 
 export default function BattlePage() {
   const [timeLeft, setTimeLeft] = useState(300) 
@@ -33,6 +34,7 @@ export default function BattlePage() {
   const [opponentSubmissionsLeft, setOpponentSubmissionsLeft] = useState(3)
   const [opponentPassedTests, setOpponentPassedTests] = useState(0)
   const [opponentAllPassed, setOpponentAllPassed] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
   const socket = getSocket()
   const router = useRouter()
   const { battleRoomId } = router.query
@@ -55,7 +57,6 @@ export default function BattlePage() {
 
   useEffect(() => {
     socket.on('match_info_received', (data) => {
-      console.log('username', data)
       setOpponentUsername(data.opponent_username)
       
       // Set start time and duration
@@ -65,9 +66,12 @@ export default function BattlePage() {
     })
 
     socket.on('update_opponent_progress', (data) => {
-      console.log('update_opponent_progress', data)
       setOpponentPassedTests(data.opponent_passed_tests)
       setOpponentSubmissionsLeft(data.opponent_submissions_left)
+      setOpponentAllPassed(data.opponent_all_passed)
+      if (data.opponent_all_passed) {
+        setShowSummary(true)
+      }
     })
 
     return () => {
@@ -93,11 +97,12 @@ export default function BattlePage() {
   }, [startTimeRef.current, durationRef.current])
 
   const calculateTimeLeft = (startTime, duration) => {
-    const currentTime = Date.now() / 1000  // Current time in seconds
+    const currentTime = Date.now() / 1000  
     const elapsed = currentTime - startTime
     const remaining = duration - elapsed
     setTimeLeft(Math.max(0, Math.ceil(remaining)))
   }
+
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60)
@@ -127,7 +132,6 @@ export default function BattlePage() {
             setPassedTests(data.passed_tests)
           }, 200) //for the animation
         }).catch(error => {
-          console.error('Error:', error)
           setError(error.message || 'An error occurred while submitting your solution. Please try again.')
           setIsLoading(false) 
         })

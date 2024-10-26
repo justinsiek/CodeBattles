@@ -62,29 +62,28 @@ def test_code():
     battle_room_id = request.args.get('battle_room_id', default=None, type=str)
     opponent_username = request.args.get('opponent_username', default=None, type=str)
     user_sid = request.args.get('user_sid', default=None, type=str)
-
-    url = "https://judge0-ce.p.rapidapi.com"
-
-    rapidapi_key = os.getenv('RAPIDAPI_KEY')
-    if not rapidapi_key:
-        return jsonify({'error': 'RAPIDAPI_KEY not set in environment variables'}), 500
-
-    headers = {
-        "X-RapidAPI-Key": rapidapi_key,
-        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-        "Content-Type": "application/json"
-    }
-
-    results = {"passed_tests": 0, "all_passed": False, "error": None}
     
-    problem = Problem.query.get(problem_id)
-    if not problem:
-        results['error'] = 'Problem not found'
-        return jsonify(results), 404
+    response_data = {"passed_tests": 0, "all_passed": False, "error": None}
+    status_code = 200
 
-    test_cases = problem.test_cases
+    try:
+        url = "https://judge0-ce.p.rapidapi.com"
 
-    full_code = f"""
+        rapidapi_key = os.getenv('RAPIDAPI_KEY')
+        if not rapidapi_key:
+            response_data['error'] = 'RAPIDAPI_KEY not set in environment variables'
+            status_code = 500
+            return
+
+        problem = Problem.query.get(problem_id)
+        if not problem:
+            response_data['error'] = 'Problem not found'
+            status_code = 404
+            return
+
+        test_cases = problem.test_cases
+
+        full_code = f"""
 import json
 
 {user_code}
@@ -92,15 +91,20 @@ import json
 {test_cases}
 """
 
-    try:
+        print("\nAttempting to create submission...")
+
+        headers = {
+            "X-RapidAPI-Key": rapidapi_key,
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+            "Content-Type": "application/json"
+        }
+
         submission_data = {
             "language_id": 71, 
             "source_code": full_code,
             "stdin": ""
         }
         
-        print("\nAttempting to create submission...")
-
         response = requests.post(f"{url}/submissions", headers=headers, json=submission_data)
         response.raise_for_status()  
 
@@ -109,7 +113,9 @@ import json
         
         if not token:
             print("Error: No token received from the API")
-            return jsonify({'error': 'No token received from the API'})
+            response_data['error'] = 'No token received from the API'
+            status_code = 500
+            return
 
         print("\nChecking submission status...")
         max_attempts = 10
@@ -135,35 +141,51 @@ import json
             passed_tests = sum(result['passed'] for result in test_results)
             total_tests = len(test_results)
             
-            results['passed_tests'] = passed_tests
-            results['all_passed'] = passed_tests == total_tests
-
-            if battle_room_id and battle_room_id in active_battles:
-                opponent_sid = next((sid for sid, player in active_battles[battle_room_id]['players'].items() if player['username'] == opponent_username), None)
-                if user_sid and user_sid in active_battles[battle_room_id]['players']:
-                    active_battles[battle_room_id]['players'][user_sid]['submissions_left'] -= 1
-                    submissions_left = active_battles[battle_room_id]['players'][user_sid]['submissions_left']
-                    socketio.emit('update_opponent_progress', {
-                        "opponent_passed_tests": passed_tests, 
-                        "opponent_submissions_left": submissions_left
-                    }, room=opponent_sid)
-                    print(f"Updated opponent progress for {opponent_username}: {passed_tests} tests passed, {submissions_left} submissions left")
-            return jsonify(results)  
+            response_data['passed_tests'] = passed_tests
+            response_data['all_passed'] = passed_tests == total_tests
         else:
-            print(f"Error: No stdout received. Full status: {status}")
-            return jsonify({'error': stderr or 'No output received from the API'}), 500
+            response_data['error'] = stderr or 'No output received from the API'
+            status_code = 500
+
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
         if http_err.response.status_code == 429:
-            results['error'] = 'API rate limit exceeded. Please try again later.'
-            return jsonify(results), 429
-        return jsonify({'error': f'HTTP error: {http_err}'}), 500
+            response_data['error'] = 'API rate limit exceeded. Please try again later.'
+            status_code = 429
+        else:
+            response_data['error'] = f'HTTP error: {http_err}'
+            status_code = 500
+
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
-        return jsonify({'error': f'Request error: {req_err}'}), 500
+        response_data['error'] = f'Request error: {req_err}'
+        status_code = 500
+
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
+        response_data['error'] = f'Unexpected error: {str(e)}'
+        status_code = 500
+
+    finally:
+        # Decrement submissions and notify opponent
+        if battle_room_id and battle_room_id in active_battles:
+            if user_sid and user_sid in active_battles[battle_room_id]['players']:
+                active_battles[battle_room_id]['players'][user_sid]['submissions_left'] -= 1
+                submissions_left = active_battles[battle_room_id]['players'][user_sid]['submissions_left']
+                
+                opponent_sid = next((sid for sid, player in active_battles[battle_room_id]['players'].items() 
+                                   if player['username'] == opponent_username), None)
+                
+                if opponent_sid:
+                    socketio.emit('update_opponent_progress', {
+                        "opponent_passed_tests": response_data['passed_tests'],
+                        "opponent_all_passed": response_data['all_passed'],
+                        "opponent_submissions_left": submissions_left
+                    }, room=opponent_sid)
+                    print(f"Updated opponent progress: {response_data['passed_tests']} tests passed, {submissions_left} submissions left")
+
+    # Return response after finally block
+    return jsonify(response_data), status_code
 
 @socketio.on('connect')
 def handle_connect():
