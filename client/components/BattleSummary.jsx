@@ -54,9 +54,11 @@ const BattleSummary = ({
               {player.ratingChange >= 0 ? `+${player.ratingChange}` : player.ratingChange}
             </span>
           </div>
-          <Badge variant={isWinner ? "default" : "secondary"}>
-            {isWinner ? "Winner" : "Runner-up"}
-          </Badge>
+          {isWinner && (
+            <Badge variant="default">
+              Winner
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Clock, Send, User } from "lucide-react"
+import { Clock, Send, User, Trophy, OctagonX } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import CodeEditor from '@/components/codeEditor'
 import { Progress } from "@/components/ui/progress"
@@ -276,8 +276,8 @@ export default function BattlePage() {
     </div>
     <Dialog open={showSummary} onOpenChange={setShowSummary}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Battle Summary</DialogTitle>
+        <DialogHeader className="flex flex-row items-center justify-center space-x-4">
+          {battleWon ? <DialogTitle className="text-2xl">You Won!</DialogTitle> : <DialogTitle className="text-2xl">You Lost...</DialogTitle>}
         </DialogHeader>
         <BattleSummary
           battleWon={battleWon}
