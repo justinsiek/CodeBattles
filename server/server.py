@@ -172,9 +172,8 @@ import json
             if user_sid and user_sid in active_battles[battle_room_id]['players']:
                 active_battles[battle_room_id]['players'][user_sid]['submissions_left'] -= 1
                 submissions_left = active_battles[battle_room_id]['players'][user_sid]['submissions_left']
-                
                 opponent_sid = next((sid for sid, player in active_battles[battle_room_id]['players'].items() 
-                                   if player['username'] == opponent_username), None)
+                    if player['username'] == opponent_username), None)
                 
                 if opponent_sid:
                     socketio.emit('update_opponent_progress', {
@@ -182,6 +181,10 @@ import json
                         "opponent_all_passed": response_data['all_passed'],
                         "opponent_submissions_left": submissions_left
                     }, room=opponent_sid)
+                    if response_data['all_passed']:
+                        socketio.emit('battle_ended', {'winner': user_sid}, room=battle_room_id)
+                        print("Battle ended")
+                        active_battles.pop(battle_room_id)
                     print(f"Updated opponent progress: {response_data['passed_tests']} tests passed, {submissions_left} submissions left")
 
     # Return response after finally block

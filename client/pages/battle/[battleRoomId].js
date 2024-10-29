@@ -13,7 +13,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react" 
 import Head from 'next/head'
 import { getSocket } from "@/utils/socketManager"
-import BattleSummary from '@/components/ui/BattleSummary'
+import BattleSummary from '@/components/BattleSummary'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 export default function BattlePage() {
   const [timeLeft, setTimeLeft] = useState(300) 
@@ -35,6 +36,7 @@ export default function BattlePage() {
   const [opponentPassedTests, setOpponentPassedTests] = useState(0)
   const [opponentAllPassed, setOpponentAllPassed] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
+  const [battleWon, setBattleWon] = useState(false)
   const socket = getSocket()
   const router = useRouter()
   const { battleRoomId } = router.query
@@ -69,9 +71,14 @@ export default function BattlePage() {
       setOpponentPassedTests(data.opponent_passed_tests)
       setOpponentSubmissionsLeft(data.opponent_submissions_left)
       setOpponentAllPassed(data.opponent_all_passed)
-      if (data.opponent_all_passed) {
-        setShowSummary(true)
+    })
+
+    socket.on('battle_ended', (data) => {
+      setShowSummary(true)
+      if (data.winner === socket.id) {
+        setBattleWon(true)
       }
+      console.log('battle ended, data:', data)
     })
 
     return () => {
@@ -267,6 +274,21 @@ export default function BattlePage() {
         </div>
       </div>
     </div>
+    <Dialog open={showSummary} onOpenChange={setShowSummary}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Battle Summary</DialogTitle>
+        </DialogHeader>
+        <BattleSummary
+          battleWon={battleWon}
+          opponentUsername={opponentUsername}
+          passedTests={passedTests}
+          opponentPassedTests={opponentPassedTests}
+          submissionsLeft={3 - submissionsLeft}
+          opponentSubmissionsLeft={3 - opponentSubmissionsLeft}
+        />
+      </DialogContent>
+    </Dialog>
     </>
   )
 }
