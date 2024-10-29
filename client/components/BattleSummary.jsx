@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { CheckCircle, Send, Trophy, User, Clock } from "lucide-react"
+import { CheckCircle, Send, Trophy, User, Clock, GitPullRequest, Home } from "lucide-react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import Link from "next/link"
 
 export default function BattleSummary({ isOpen, onClose, battleWon, opponentUsername, passedTests, opponentPassedTests, submissionsLeft, opponentSubmissionsLeft, battleDuration }) {
   const player1 = {
@@ -95,10 +96,17 @@ export default function BattleSummary({ isOpen, onClose, battleWon, opponentUser
               {renderPlayerResult(player2, winner === player2)}
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button onClick={onClose} className="px-8 py-2">
-              Close
+          <CardFooter className="flex justify-center items-center space-x-4">
+            <Button variant="outline" onClick={onClose} className="px-8 py-2">
+              <GitPullRequest className="mr-2 h-4 w-4" />
+              View Code
             </Button>
+            <Link href="/">
+              <Button className="px-8 py-2">
+                <Home className="mr-2 h-4 w-4" />
+                Go Home
+              </Button>
+            </Link>
           </CardFooter>
         </Card>
       </DialogContent>

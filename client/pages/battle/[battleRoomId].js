@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Clock, Send, User, Trophy, OctagonX } from "lucide-react"
+import { Clock, Send, User, GitBranch, Home } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import CodeEditor from '@/components/codeEditor'
 import { Progress } from "@/components/ui/progress"

@@ -181,7 +181,7 @@ import json
                         "opponent_all_passed": response_data['all_passed'],
                         "opponent_submissions_left": submissions_left
                     }, room=opponent_sid)
-                    if response_data['all_passed']:
+                    if response_data['passed_tests'] > 0:
                         socketio.emit('battle_ended', {'winner': user_sid}, room=battle_room_id)
                         print("Battle ended")
                         active_battles.pop(battle_room_id)
