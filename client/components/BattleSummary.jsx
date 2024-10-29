@@ -1,42 +1,31 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Clock, CheckCircle, Send } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { CheckCircle, Send, Trophy, User, Clock } from "lucide-react"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 
-const BattleSummary = ({ 
-  battleWon, 
-  opponentUsername, 
-  passedTests, 
-  opponentPassedTests, 
-  submissionsLeft, 
-  opponentSubmissionsLeft,
-  onClose
-}) => {
-  const [isOpen, setIsOpen] = useState(true)
-
-  useEffect(() => {
-    setIsOpen(true)
-  }, [battleWon, opponentUsername, passedTests, opponentPassedTests, submissionsLeft, opponentSubmissionsLeft])
-
+export default function BattleSummary({ isOpen, onClose, battleWon, opponentUsername, passedTests, opponentPassedTests, submissionsLeft, opponentSubmissionsLeft, battleDuration }) {
   const player1 = {
     username: "You",
-    // Assuming passedTests and submissionsLeft pertain to the current user
     testsPassed: passedTests,
-    totalTests: 11, // You might want to pass this as a prop if it can vary
+    totalTests: 11,
     submissions: submissionsLeft,
-    ratingChange: battleWon ? 25 : -25 // Adjust logic as needed
+    ratingChange: battleWon ? 25 : -25
   }
 
   const player2 = {
     username: opponentUsername,
     testsPassed: opponentPassedTests,
-    totalTests: 11, // Similarly, adjust if needed
+    totalTests: 11,
     submissions: opponentSubmissionsLeft,
-    ratingChange: battleWon ? -25 : 25 // Opposite of player1
+    ratingChange: battleWon ? -25 : 25
   }
+
+  const winner = battleWon ? player1 : player2
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60)
@@ -45,53 +34,74 @@ const BattleSummary = ({
   }
 
   const renderPlayerResult = (player, isWinner) => (
-    <Card className={`w-full border-secondary`}>
+    <Card className={`w-full ${isWinner ? 'border-primary' : 'border-secondary'}`}>
       <CardHeader className="pb-2">
         <CardTitle className="flex justify-between items-center">
           <div className="flex items-center">
+            <User className="mr-2 h-5 w-5" />
             <span>{player.username}</span>
-            <span className={`ml-2 text-sm ${player.ratingChange >= 0 ? "text-green-500" : "text-red-500"}`}>
+            <span 
+              className={`ml-2 text-sm font-bold ${player.ratingChange >= 0 ? "text-green-500" : "text-red-500"}`}
+            >
               {player.ratingChange >= 0 ? `+${player.ratingChange}` : player.ratingChange}
             </span>
           </div>
           {isWinner && (
-            <Badge variant="default">
+            <Badge variant="default" className="text-primary-foreground">
+              <Trophy className="mr-1 h-4 w-4" />
               Winner
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="flex items-center">
+            <span className="flex items-center text-sm">
               <CheckCircle className="mr-2 h-4 w-4" />
               Tests Passed:
             </span>
-            <span>{player.testsPassed}/{player.totalTests}</span>
+            <span className="font-bold">{player.testsPassed}/{player.totalTests}</span>
+          </div>
+          <div className="w-full">
+            <Progress value={(player.testsPassed / player.totalTests) * 100} className="h-2" />
           </div>
           <div className="flex justify-between items-center">
-            <span className="flex items-center">
+            <span className="flex items-center text-sm">
               <Send className="mr-2 h-4 w-4" />
-              Submissions:
+              Submissions Left:
             </span>
-            <span>{player.submissions}</span>
+            <span className="font-bold">{player.submissions}</span>
           </div>
         </div>
       </CardContent>
     </Card>
   )
 
-  const winner = battleWon ? player1 : player2
-
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {renderPlayerResult(player1, winner === player1)}
-        {renderPlayerResult(player2, winner === player2)}
-      </div>
-    </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[800px] p-0">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">Battle Summary</CardTitle>
+            <CardDescription className="text-center">
+              <Clock className="inline mr-2 h-4 w-4" />
+              Battle Duration: {formatTime(battleDuration)}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {renderPlayerResult(player1, winner === player1)}
+              {renderPlayerResult(player2, winner === player2)}
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button onClick={onClose} className="px-8 py-2">
+              Close
+            </Button>
+          </CardFooter>
+        </Card>
+      </DialogContent>
+    </Dialog>
   )
 }
-
-export default BattleSummary

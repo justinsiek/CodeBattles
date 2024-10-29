@@ -274,21 +274,17 @@ export default function BattlePage() {
         </div>
       </div>
     </div>
-    <Dialog open={showSummary} onOpenChange={setShowSummary}>
-      <DialogContent>
-        <DialogHeader className="flex flex-row items-center justify-center space-x-4">
-          {battleWon ? <DialogTitle className="text-2xl">You Won!</DialogTitle> : <DialogTitle className="text-2xl">You Lost...</DialogTitle>}
-        </DialogHeader>
-        <BattleSummary
-          battleWon={battleWon}
-          opponentUsername={opponentUsername}
-          passedTests={passedTests}
-          opponentPassedTests={opponentPassedTests}
-          submissionsLeft={3 - submissionsLeft}
-          opponentSubmissionsLeft={3 - opponentSubmissionsLeft}
-        />
-      </DialogContent>
-    </Dialog>
+    <BattleSummary 
+        isOpen={showSummary} 
+        onClose={() => setShowSummary(false)} 
+        battleWon={battleWon}
+        opponentUsername={opponentUsername}
+        passedTests={passedTests}
+        opponentPassedTests={opponentPassedTests}
+        submissionsLeft={submissionsLeft}
+        opponentSubmissionsLeft={opponentSubmissionsLeft}
+        battleDuration={durationRef.current}
+      />
     </>
   )
 }
