@@ -84,7 +84,7 @@ export default function BattleSummary({ isOpen, onClose, battleWon, opponentUser
       <DialogContent className="sm:max-w-[800px] p-0">
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Battle Summary</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">{winner === player1 ? "You Won!" : "You Lost..."}</CardTitle>
             <CardDescription className="text-center">
               <Clock className="inline mr-2 h-4 w-4" />
               Battle Duration: {formatTime(battleDuration)}
