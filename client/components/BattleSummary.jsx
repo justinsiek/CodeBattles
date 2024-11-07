@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { CheckCircle, Send, Trophy, User, Clock, GitPullRequest, Home } from "lucide-react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import Link from "next/link"
+import { useRouter } from 'next/router'
 
 export default function BattleSummary({ isOpen, onClose, battleWon, opponentUsername, passedTests, opponentPassedTests, submissionsLeft, opponentSubmissionsLeft, battleDuration }) {
+  const router = useRouter()
   const player1 = {
     username: "You",
     testsPassed: passedTests,
@@ -101,12 +102,10 @@ export default function BattleSummary({ isOpen, onClose, battleWon, opponentUser
               <GitPullRequest className="mr-2 h-4 w-4" />
               View Code
             </Button>
-            <Link href="/">
-              <Button className="px-8 py-2">
-                <Home className="mr-2 h-4 w-4" />
-                Go Home
-              </Button>
-            </Link>
+            <Button className="px-8 py-2" onClick={() => router.push('/')}>
+              <Home className="mr-2 h-4 w-4" />
+              Go Home
+            </Button>
           </CardFooter>
         </Card>
       </DialogContent>
