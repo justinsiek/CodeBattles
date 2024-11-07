@@ -94,14 +94,14 @@ export default function BattlePage() {
   }, [battleRoomId, socket])
 
   useEffect(() => {
-    if (startTimeRef.current && durationRef.current) {
+    if (startTimeRef.current && durationRef.current && !showSummary) {
       const timer = setInterval(() => {
         calculateTimeLeft(startTimeRef.current, durationRef.current)
       }, 1000)
 
       return () => clearInterval(timer)
     }
-  }, [startTimeRef.current, durationRef.current])
+  }, [startTimeRef.current, durationRef.current, showSummary])
 
   const calculateTimeLeft = (startTime, duration) => {
     const currentTime = Date.now() / 1000  
