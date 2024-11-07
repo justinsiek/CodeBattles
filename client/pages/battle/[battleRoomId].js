@@ -61,7 +61,6 @@ export default function BattlePage() {
     socket.on('match_info_received', (data) => {
       setOpponentUsername(data.opponent_username)
       
-      // Set start time and duration
       startTimeRef.current = data.start_time
       durationRef.current = data.duration
       calculateTimeLeft(data.start_time, data.duration)

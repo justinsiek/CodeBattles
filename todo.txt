@@ -1,0 +1,11 @@
+- User Login
+- User Register
+- Database For User Data
+- User Profile
+- Friend System
+- Matchmaking
+- Past Battles Database
+- When User Goes Back To Home Page, User Info Persists
+
+
+
