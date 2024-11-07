@@ -283,7 +283,7 @@ export default function BattlePage() {
         opponentPassedTests={opponentPassedTests}
         submissionsLeft={submissionsLeft}
         opponentSubmissionsLeft={opponentSubmissionsLeft}
-        battleDuration={durationRef.current}
+        battleDuration={Math.max(0, durationRef.current - timeLeft)}
       />
     </>
   )
