@@ -4,4 +4,6 @@
 
 /client/.next
 
+/client/.env.local
 /server/.env
+
