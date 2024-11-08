@@ -3,8 +3,21 @@ import { Sword, Swords, Code, Users, History } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { BattlePopup } from "@/components/battlePopup"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useRouter } from 'next/router'
+import { getSocket } from "@/utils/socketManager"
 
 export function LeftSidebar( {username, rating} ) {
+  const router = useRouter()
+  const socket = getSocket()
+
+  const handleLogout = () => {
+    localStorage.removeItem('username')
+    if (socket) {
+      socket.disconnect()
+    }
+    router.push('/login')
+  }
+
   return (
     <div className="w-64 border-r pt-4 px-4 flex flex-col">
       <div className="flex items-center space-x-2 mb-6">
@@ -40,13 +53,18 @@ export function LeftSidebar( {username, rating} ) {
         </Button>
       </nav>
       <div className="mt-auto">
-        <div className="flex items-center space-x-4 mb-6">
+        <div 
+          className="flex items-center space-x-4 mb-6 p-2 rounded-lg cursor-pointer transition-colors hover:bg-secondary group"
+          onClick={handleLogout}
+          role="button"
+          title="Click to logout"
+        >
           <Avatar className="h-12 w-12">
             <AvatarImage src="/avatars/01.png" alt="@username" />
-            <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{username ? username.charAt(0) : ' '}</AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="font-semibold">{username}</h2>
+            <h2 className="font-semibold group-hover:text-primary">{username}</h2>
             <p className="text-sm text-muted-foreground">Rating: {rating}</p>
           </div>
         </div>

@@ -7,5 +7,9 @@
 - Past Battles Database
 - When User Goes Back To Home Page, User Info Persists
 
+Bugs:
+- When reloading home, username flashes blank for a split second
+
+
 
 

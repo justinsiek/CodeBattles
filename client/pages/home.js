@@ -18,7 +18,7 @@ import { useRouter } from 'next/router'
 import { getSocket } from "@/utils/socketManager"
 
 export default function Home() {
-  const [username, setUsername] = useState('bob') // TODO: Remove this
+  const [username, setUsername] = useState(null)
   const [rating, setRating] = useState(1850)
   const [currentRank, setCurrentRank] = useState("Elite")
   const [nextRank, setNextRank] = useState("Expert")
@@ -284,7 +284,7 @@ export default function Home() {
           {connectedUsers.map((user, index) => (
             <div key={index} className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback>{user.username[0]}</AvatarFallback>
+                <AvatarFallback>{user.username ? user.username[0] : ' '}</AvatarFallback>
               </Avatar>
               <div>
                 <div className="font-medium">{user.username}</div>

@@ -102,7 +102,7 @@ export default function BattleSummary({ isOpen, onClose, battleWon, opponentUser
               <GitPullRequest className="mr-2 h-4 w-4" />
               View Code
             </Button>
-            <Button className="px-8 py-2" onClick={() => router.push('/')}>
+            <Button className="px-8 py-2" onClick={() => router.push('/home')}>
               <Home className="mr-2 h-4 w-4" />
               Go Home
             </Button>
