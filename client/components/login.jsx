@@ -28,7 +28,8 @@ export default function LoginPage({ onLogin } ) {
           <CardTitle className="text-3xl font-bold">CodeBattles</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="mb-2">
+            <div className="space-y-4 mb-8">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
@@ -51,6 +52,7 @@ export default function LoginPage({ onLogin } ) {
                 required
               />
             </div>
+            </div>
             <Button type="submit" className="w-full group">
               <Sword className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
               Enter the Arena
@@ -59,17 +61,6 @@ export default function LoginPage({ onLogin } ) {
 
           <div className="mt-6">
             <Separator className="my-4" />
-            <div className="text-center text-sm text-muted-foreground">Or continue with</div>
-            <div className="flex gap-4 mt-4">
-              <Button variant="outline" className="w-full">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Code className="mr-2 h-4 w-4" />
-                LeetCode
-              </Button>
-            </div>
           </div>
 
           <div className="mt-6 text-center text-sm">
