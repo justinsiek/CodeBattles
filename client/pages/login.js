@@ -20,16 +20,12 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault()
     
-    // Emit the username to the socket
     socket.emit('set_username', { username })
 
-    // Listen for the response
     socket.once('username_set', (response) => {
       if (response.status === 'success') {
-        // Store username in localStorage for persistence
         localStorage.setItem('username', username)
         
-        // Redirect to home page
         router.push('/home')
       } else {
         console.error('Failed to set username:', response.message)

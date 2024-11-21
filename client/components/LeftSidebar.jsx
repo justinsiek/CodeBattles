@@ -12,9 +12,6 @@ export function LeftSidebar( {username, rating} ) {
 
   const handleLogout = () => {
     localStorage.removeItem('username')
-    if (socket) {
-      socket.disconnect()
-    }
     router.push('/login')
   }
 
