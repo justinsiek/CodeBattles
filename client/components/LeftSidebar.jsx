@@ -11,6 +11,7 @@ export function LeftSidebar( {username, rating} ) {
   const socket = getSocket()
 
   const handleLogout = () => {
+    socket.emit('disconnect')
     localStorage.removeItem('username')
     router.push('/login')
   }
