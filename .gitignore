@@ -1,9 +1,11 @@
 
-/client/node_modules
-/server/node_modules
+/oldclient/node_modules
+/oldserver/node_modules
 
-/client/.next
+/oldclient/.next
 
-/client/.env.local
-/server/.env
+/oldclient/.env.local
+/oldserver/.env
+
+
 
